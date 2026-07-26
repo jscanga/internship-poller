@@ -14,6 +14,10 @@
 #
 # keywords: job title must contain at least one of these (case-insensitive)
 # exclude:  job title must NOT contain any of these
+# us_only:  if true, rejects postings whose location clearly names a non-US
+#           country/city (a blocklist, not an allowlist) -- blank/unknown
+#           locations are always kept rather than risk dropping a real US role.
+#           Default is false (no location filtering) if omitted.
 #
 # VERIFY = I'm not certain this slug/tenant is correct. See README for how
 # to confirm it in under 5 minutes before you trust that company's alerts.
@@ -25,6 +29,7 @@
     slug: "duolingo"
   keywords: ["intern"]
   exclude: []
+  us_only: true
 
 - name: "DraftKings"
   adapter: workday
@@ -35,6 +40,7 @@
     search_text: "intern"       # server-side search, avoids only-seeing-first-20-jobs problem
   keywords: ["intern"]
   exclude: []
+  us_only: true
 
 - name: "Databricks"
   adapter: greenhouse
@@ -42,6 +48,7 @@
     slug: "databricks"          # confirmed working
   keywords: ["intern"]
   exclude: []
+  us_only: true
 
 - name: "Snowflake"
   adapter: ashby
@@ -49,6 +56,7 @@
     board: "snowflake"
   keywords: ["intern"]
   exclude: []
+  us_only: true
 
 - name: "Capital One"
   adapter: workday
@@ -59,6 +67,7 @@
     search_text: "intern"
   keywords: ["intern", "tip"]
   exclude: []
+  us_only: true
 
 - name: "Walmart"
   adapter: workday
@@ -69,6 +78,7 @@
     search_text: "intern"
   keywords: ["intern"]
   exclude: []
+  us_only: true
 
 # The big three (Amazon/Microsoft/Google) and IBM run their own bespoke
 # career search backends rather than a standard ATS. generic_json works,
@@ -84,8 +94,10 @@
     title_field: "title"
     url_field: "job_path"
     url_prefix: "https://www.amazon.jobs"
+    location_field: "normalized_location"   # VERIFY -- best guess, check a raw response if us_only seems to over/under-filter
   keywords: ["intern"]
   exclude: []
+  us_only: true
 
 - name: "Microsoft"
   adapter: generic_json
@@ -96,8 +108,10 @@
     title_field: "name"            # empty, open the search XHR in DevTools -> Response tab and
     url_field: "id"                # check the actual key names, then tell me what they are.
     url_prefix: "https://apply.careers.microsoft.com/careers?pid="
+    location_field: "location"    # VERIFY -- best guess, same caveat as jobs_path/title_field above
   keywords: ["intern", "explore"]
   exclude: []
+  us_only: true
 
 - name: "Google"
   adapter: google_html
@@ -105,6 +119,7 @@
     url: "https://www.google.com/about/careers/applications/jobs/results?q=intern&sort_by=date"  # VERIFY -- paste your actual search URL here if this 404s or returns nothing
   keywords: ["intern"]
   exclude: []
+  us_only: true
 
 - name: "IBM"
   adapter: generic_json
@@ -117,3 +132,4 @@
     url_prefix: ""
   keywords: ["intern"]
   exclude: []
+  us_only: true
