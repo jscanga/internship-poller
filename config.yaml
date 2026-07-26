@@ -1,0 +1,115 @@
+# ============================================================================
+# intern-watch config
+#
+# Each entry = one company you're monitoring.
+#
+# adapter options:
+#   greenhouse  -> params: { slug: "companyname" }
+#   lever       -> params: { slug: "companyname" }
+#   workday     -> params: { tenant: "companyname", site: "SiteName" }
+#   generic_json-> params: { url: "...", jobs_path: "jobs", id_field: "id",
+#                             title_field: "title", url_field: "url" }
+#
+# keywords: job title must contain at least one of these (case-insensitive)
+# exclude:  job title must NOT contain any of these
+#
+# VERIFY = I'm not certain this slug/tenant is correct. See README for how
+# to confirm it in under 5 minutes before you trust that company's alerts.
+# ============================================================================
+
+- name: "Duolingo"
+  adapter: greenhouse
+  params:
+    slug: "duolingo"
+  keywords: ["intern"]
+  exclude: []
+
+- name: "DraftKings"
+  adapter: greenhouse
+  params:
+    slug: "draftkings"          # VERIFY
+  keywords: ["intern"]
+  exclude: []
+
+- name: "Databricks"
+  adapter: greenhouse
+  params:
+    slug: "databricks"          # VERIFY
+  keywords: ["intern"]
+  exclude: []
+
+- name: "Snowflake"
+  adapter: greenhouse
+  params:
+    slug: "snowflake"           # VERIFY
+  keywords: ["intern"]
+  exclude: []
+
+- name: "Capital One"
+  adapter: workday
+  params:
+    tenant: "capitalone"        # VERIFY
+    site: "Capital_One"         # VERIFY
+  keywords: ["intern", "tip"]
+  exclude: []
+
+- name: "Walmart"
+  adapter: workday
+  params:
+    tenant: "walmart"           # VERIFY
+    site: "WalmartExternal"     # VERIFY
+  keywords: ["intern"]
+  exclude: []
+
+# The big three (Amazon/Microsoft/Google) and IBM run their own bespoke
+# career search backends rather than a standard ATS. generic_json works,
+# but you MUST inspect the real request shape yourself (see README "Big Tech"
+# section) -- these params are placeholders, not verified endpoints.
+
+- name: "Amazon"
+  adapter: generic_json
+  params:
+    url: "https://www.amazon.jobs/en/search.json?base_query=software+development+engineer+intern&normalized_country_code%5B%5D=USA&result_limit=20&sort=recent"
+    jobs_path: "jobs"
+    id_field: "id_icims"
+    title_field: "title"
+    url_field: "job_path"
+    url_prefix: "https://www.amazon.jobs"
+  keywords: ["intern"]
+  exclude: []
+
+- name: "Microsoft"
+  adapter: generic_json
+  params:
+    url: "https://gcsservices.careers.microsoft.com/search/api/v1/search?q=Explore&l=en_us&pg=1&pgSz=20&o=Recent"
+    jobs_path: "operationResult.result.jobs"
+    id_field: "jobId"
+    title_field: "title"
+    url_field: "jobId"
+    url_prefix: "https://careers.microsoft.com/us/en/job/"
+  keywords: ["intern", "explore"]
+  exclude: []
+
+- name: "Google"
+  adapter: generic_json
+  params:
+    url: "https://careers.google.com/api/v3/search/?q=%22software%20engineering%20intern%22&location=United%20States"
+    jobs_path: "jobs"
+    id_field: "job_id"
+    title_field: "title"
+    url_field: "apply_url"
+    url_prefix: ""
+  keywords: ["intern"]
+  exclude: []
+
+- name: "IBM"
+  adapter: generic_json
+  params:
+    url: "https://www.ibm.com/careers/api/search?field_keyword=intern"    # VERIFY - placeholder
+    jobs_path: "jobs"
+    id_field: "id"
+    title_field: "title"
+    url_field: "url"
+    url_prefix: ""
+  keywords: ["intern"]
+  exclude: []
