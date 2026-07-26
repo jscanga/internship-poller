@@ -29,9 +29,14 @@ def save_state(state):
 
 
 def _word_in(word, text):
-    """Whole-word match, case-insensitive. Prevents 'intern' from matching
-    inside 'International' or 'Internals'."""
-    return re.search(r"\b" + re.escape(word.lower()) + r"\b", text.lower()) is not None
+    """Whole-word-ish match, case-insensitive. Matches the bare word plus a
+    small set of common suffixes (so 'intern' still matches 'Internship' and
+    'Interns'), while still refusing to match inside unrelated words like
+    'International' or 'Internals' -- those fail because 'ational'/'als'
+    aren't in the allowed suffix list, so the required word boundary after
+    the match never lines up."""
+    pattern = r"\b" + re.escape(word.lower()) + r"(?:s|ship|ships)?\b"
+    return re.search(pattern, text.lower()) is not None
 
 
 def matches_filters(title, keywords, exclude):
