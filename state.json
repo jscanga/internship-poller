@@ -1,0 +1,59 @@
+{
+  "companies": {
+    "Duolingo": {
+      "seen_ids": [],
+      "broken": false
+    },
+    "DraftKings": {
+      "seen_ids": [],
+      "broken": true
+    },
+    "Databricks": {
+      "seen_ids": [
+        "5646866002",
+        "8012809002",
+        "7011263002",
+        "6883068002",
+        "8012818002",
+        "6544383002",
+        "5048461002",
+        "8632282002",
+        "6544386002",
+        "8012658002"
+      ],
+      "broken": false
+    },
+    "Snowflake": {
+      "seen_ids": [],
+      "broken": true
+    },
+    "Capital One": {
+      "seen_ids": [],
+      "broken": true
+    },
+    "Walmart": {
+      "seen_ids": [],
+      "broken": true
+    },
+    "Amazon": {
+      "seen_ids": [
+        "10412530",
+        "3179209",
+        "3136266"
+      ],
+      "broken": false
+    },
+    "Microsoft": {
+      "seen_ids": [],
+      "broken": true
+    },
+    "Google": {
+      "seen_ids": [],
+      "broken": true
+    },
+    "IBM": {
+      "seen_ids": [],
+      "broken": true
+    }
+  }
+}
