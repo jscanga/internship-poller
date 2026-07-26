@@ -42,6 +42,36 @@ def matches_filters(title, keywords, exclude):
     return True
 
 
+# Countries/regions to reject when us_only is set. Deliberately NOT an allowlist --
+# a blank, missing, or unrecognized location is always kept. This list only needs
+# to catch clear non-US signals; ambiguous names (e.g. "Georgia" the country vs.
+# the US state) are left out on purpose to avoid false rejections.
+NON_US_MARKERS = [
+    "india", "canada", "mexico", "brazil", "argentina", "chile", "colombia", "peru",
+    "united kingdom", "england", "scotland", "wales", "ireland",
+    "germany", "france", "spain", "italy", "netherlands", "poland", "portugal",
+    "romania", "austria", "switzerland", "sweden", "denmark", "norway", "finland",
+    "belgium", "czech republic", "hungary", "greece",
+    "china", "japan", "korea", "taiwan", "hong kong", "singapore", "indonesia",
+    "malaysia", "thailand", "vietnam", "philippines",
+    "australia", "new zealand",
+    "israel", "united arab emirates", "saudi arabia", "egypt", "south africa",
+    "bangalore", "hyderabad", "pune", "gurugram", "gurgaon", "noida", "chennai", "mumbai",
+    "toronto", "vancouver", "montreal",
+    "london", "dublin", "berlin", "munich", "paris", "madrid", "amsterdam", "warsaw",
+    "tokyo", "seoul", "shanghai", "beijing", "shenzhen", "sydney", "melbourne",
+]
+
+
+def passes_location_filter(location, us_only):
+    if not us_only:
+        return True
+    if not location:
+        return True  # unknown location -- keep by default, don't risk losing a real US role
+    loc = location.lower()
+    return not any(marker in loc for marker in NON_US_MARKERS)
+
+
 def main():
     config = load_config()
     state = load_state()
@@ -72,9 +102,17 @@ def main():
 
         keywords = company.get("keywords", [])
         exclude = company.get("exclude", [])
-        matching = [j for j in jobs if matches_filters(j["title"], keywords, exclude)]
+        us_only = company.get("us_only", False)
 
-        print(f"[info] {name}: fetched {len(jobs)} total posting(s), {len(matching)} matched keywords")
+        keyword_matches = [j for j in jobs if matches_filters(j["title"], keywords, exclude)]
+        matching = [j for j in keyword_matches if passes_location_filter(j.get("location", ""), us_only)]
+        dropped_for_location = len(keyword_matches) - len(matching)
+
+        print(
+            f"[info] {name}: fetched {len(jobs)} total posting(s), "
+            f"{len(keyword_matches)} matched keywords, "
+            f"{dropped_for_location} dropped as non-US"
+        )
 
         seen_ids = set(cstate["seen_ids"])
         new_jobs = [j for j in matching if j["id"] not in seen_ids]
