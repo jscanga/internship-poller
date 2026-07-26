@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 import yaml
 
@@ -27,11 +28,16 @@ def save_state(state):
         json.dump(state, f, indent=2)
 
 
+def _word_in(word, text):
+    """Whole-word match, case-insensitive. Prevents 'intern' from matching
+    inside 'International' or 'Internals'."""
+    return re.search(r"\b" + re.escape(word.lower()) + r"\b", text.lower()) is not None
+
+
 def matches_filters(title, keywords, exclude):
-    t = title.lower()
-    if keywords and not any(k.lower() in t for k in keywords):
+    if keywords and not any(_word_in(k, title) for k in keywords):
         return False
-    if exclude and any(e.lower() in t for e in exclude):
+    if exclude and any(_word_in(e, title) for e in exclude):
         return False
     return True
 
