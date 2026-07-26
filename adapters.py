@@ -39,6 +39,7 @@ def fetch_greenhouse(params):
             "id": str(j["id"]),
             "title": j.get("title", ""),
             "url": j.get("absolute_url", ""),
+            "location": (j.get("location") or {}).get("name", ""),
         })
     return jobs
 
@@ -55,6 +56,7 @@ def fetch_lever(params):
             "id": str(j.get("id")),
             "title": j.get("text", ""),
             "url": j.get("hostedUrl", ""),
+            "location": (j.get("categories") or {}).get("location", ""),
         })
     return jobs
 
@@ -65,18 +67,31 @@ def fetch_workday(params):
     wd = params.get("wd", "wd1")  # e.g. "wd1", "wd5", "wd12" -- varies per company, check DevTools
     search_text = params.get("search_text", "intern")  # server-side search avoids the 20-result page cap
     url = f"https://{tenant}.{wd}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs"
-    body = {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": search_text}
-    r = requests.post(url, headers=HEADERS, json=body, timeout=TIMEOUT)
-    r.raise_for_status()
-    data = _parse_json(r)
+
     jobs = []
-    for j in data.get("jobPostings", []):
-        path = j.get("externalPath", "")
-        jobs.append({
-            "id": path or j.get("title", ""),
-            "title": j.get("title", ""),
-            "url": f"https://{tenant}.{wd}.myworkdayjobs.com/{site}{path}",
-        })
+    offset = 0
+    page_size = 20
+    total_reported = None
+    for _ in range(5):  # cap at 100 postings (5 pages) -- plenty for an "intern" search
+        body = {"appliedFacets": {}, "limit": page_size, "offset": offset, "searchText": search_text}
+        r = requests.post(url, headers=HEADERS, json=body, timeout=TIMEOUT)
+        r.raise_for_status()
+        data = _parse_json(r)
+        total_reported = data.get("total", total_reported)
+        page_jobs = data.get("jobPostings", [])
+        for j in page_jobs:
+            path = j.get("externalPath", "")
+            jobs.append({
+                "id": path or j.get("title", ""),
+                "title": j.get("title", ""),
+                "url": f"https://{tenant}.{wd}.myworkdayjobs.com/{site}{path}",
+                "location": j.get("locationsText", ""),
+            })
+        if len(page_jobs) < page_size:
+            break  # last page
+        offset += page_size
+
+    print(f"[debug] workday {tenant}/{site}: reported total={total_reported}, fetched={len(jobs)}")
     return jobs
 
 
@@ -104,8 +119,11 @@ def fetch_generic_json(params):
         title = j.get(params["title_field"], "")
         raw_url = str(j.get(params["url_field"], ""))
         full_url = raw_url if raw_url.startswith("http") else prefix + raw_url
+        location = ""
+        if "location_field" in params:
+            location = str(j.get(params["location_field"], ""))
         if job_id:
-            jobs.append({"id": job_id, "title": title, "url": full_url})
+            jobs.append({"id": job_id, "title": title, "url": full_url, "location": location})
     return jobs
 
 
@@ -122,6 +140,7 @@ def fetch_ashby(params):
             "id": job_url,        # Ashby's public API doesn't expose a bare job id, so the URL (which contains a UUID) doubles as one
             "title": j.get("title", ""),
             "url": job_url,
+            "location": j.get("location", ""),
         })
     return jobs
 
@@ -156,6 +175,11 @@ def fetch_google(params):
             "id": job_id,
             "title": title.encode("utf-8").decode("unicode_escape") if "\\u" in title else title,
             "url": apply_url.replace("\\u003d", "=").replace("\\u0026", "&"),
+            # deliberately left blank: the URL's loc= param is a 2-letter code that's
+            # ambiguous (e.g. "CA" could mean California or Canada) -- guessing here
+            # risks silently dropping real US postings, so we leave it unknown and let
+            # the blocklist filter keep it by default instead.
+            "location": "",
         })
     return jobs
 
