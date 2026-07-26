@@ -32,6 +32,7 @@
     tenant: "draftkings"
     site: "DraftKings"
     wd: "wd1"
+    search_text: "intern"       # server-side search, avoids only-seeing-first-20-jobs problem
   keywords: ["intern"]
   exclude: []
 
@@ -55,6 +56,7 @@
     tenant: "capitalone"
     site: "Capital_One"
     wd: "wd12"                  # confirmed: they migrated off wd1 to wd12
+    search_text: "intern"
   keywords: ["intern", "tip"]
   exclude: []
 
@@ -64,6 +66,7 @@
     tenant: "walmart"
     site: "WalmartExternal"
     wd: "wd5"                   # confirmed
+    search_text: "intern"
   keywords: ["intern"]
   exclude: []
 
