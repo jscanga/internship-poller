@@ -72,7 +72,7 @@ def fetch_workday(params):
     offset = 0
     page_size = 20
     total_reported = None
-    for _ in range(5):  # cap at 100 postings (5 pages) -- plenty for an "intern" search
+    for _ in range(10):  # cap at 200 postings (10 pages)
         body = {"appliedFacets": {}, "limit": page_size, "offset": offset, "searchText": search_text}
         r = requests.post(url, headers=HEADERS, json=body, timeout=TIMEOUT)
         r.raise_for_status()
@@ -92,6 +92,12 @@ def fetch_workday(params):
         offset += page_size
 
     print(f"[debug] workday {tenant}/{site}: reported total={total_reported}, fetched={len(jobs)}")
+    if total_reported and total_reported > len(jobs) * 3:
+        print(
+            f"[warn] workday {tenant}/{site}: total ({total_reported}) is much larger than what "
+            f"we fetched ({len(jobs)}) -- searchText='{search_text}' likely isn't filtering "
+            f"server-side, so postings beyond page {len(jobs)//page_size} could be missed"
+        )
     return jobs
 
 
