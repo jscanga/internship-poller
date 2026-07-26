@@ -7,6 +7,8 @@ and a KeyError here should never crash the whole run for every other
 company. main.py wraps each company's fetch in try/except already, but
 adapters should still fail loudly with a clear message when they do fail.
 """
+import re
+
 import requests
 
 HEADERS = {
@@ -113,10 +115,45 @@ def fetch_ashby(params):
     return jobs
 
 
+def fetch_google(params):
+    """
+    Google's careers site doesn't expose a clean JSON API -- job data is
+    embedded directly in the search results page's HTML as part of a large
+    internal data blob. This pulls out (job_id, title, apply_url) triples
+    via regex instead of parsing that whole structure.
+
+    Fragile by nature: if Google changes their page's internal format, this
+    regex will start returning zero jobs (not crash) -- worth spot-checking
+    every so often with the [info] log line main.py prints each run.
+    """
+    url = params["url"]
+    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    html = r.text
+
+    # matches: "123456789","Job Title Here","https://www.google.com/about/careers/applications/signin?jobId=...."
+    pattern = re.compile(
+        r'"(\d{10,})","([^"]+)","(https://www\.google\.com/about/careers/applications/signin\?jobId[^"]+)"'
+    )
+    jobs = []
+    seen = set()
+    for job_id, title, apply_url in pattern.findall(html):
+        if job_id in seen:
+            continue
+        seen.add(job_id)
+        jobs.append({
+            "id": job_id,
+            "title": title.encode("utf-8").decode("unicode_escape") if "\\u" in title else title,
+            "url": apply_url.replace("\\u003d", "=").replace("\\u0026", "&"),
+        })
+    return jobs
+
+
 ADAPTERS = {
     "greenhouse": fetch_greenhouse,
     "lever": fetch_lever,
     "workday": fetch_workday,
     "ashby": fetch_ashby,
     "generic_json": fetch_generic_json,
+    "google_html": fetch_google,
 }
