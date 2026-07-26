@@ -17,12 +17,22 @@ HEADERS = {
 TIMEOUT = 15
 
 
+def _parse_json(r):
+    try:
+        return r.json()
+    except ValueError as e:
+        snippet = r.text[:200].replace("\n", " ")
+        raise RuntimeError(
+            f"non-JSON response (status {r.status_code}): {snippet!r}"
+        ) from e
+
+
 def fetch_greenhouse(params):
     slug = params["slug"]
     url = f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=false"
     r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
     r.raise_for_status()
-    data = r.json()
+    data = _parse_json(r)
     jobs = []
     for j in data.get("jobs", []):
         jobs.append({
@@ -38,7 +48,7 @@ def fetch_lever(params):
     url = f"https://api.lever.co/v0/postings/{slug}?mode=json"
     r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
     r.raise_for_status()
-    data = r.json()
+    data = _parse_json(r)
     jobs = []
     for j in data:
         jobs.append({
@@ -53,18 +63,19 @@ def fetch_workday(params):
     tenant = params["tenant"]
     site = params["site"]
     wd = params.get("wd", "wd1")  # e.g. "wd1", "wd5", "wd12" -- varies per company, check DevTools
+    search_text = params.get("search_text", "intern")  # server-side search avoids the 20-result page cap
     url = f"https://{tenant}.{wd}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs"
-    body = {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": ""}
+    body = {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": search_text}
     r = requests.post(url, headers=HEADERS, json=body, timeout=TIMEOUT)
     r.raise_for_status()
-    data = r.json()
+    data = _parse_json(r)
     jobs = []
     for j in data.get("jobPostings", []):
         path = j.get("externalPath", "")
         jobs.append({
             "id": path or j.get("title", ""),
             "title": j.get("title", ""),
-            "url": f"https://{tenant}.wd1.myworkdayjobs.com/{site}{path}",
+            "url": f"https://{tenant}.{wd}.myworkdayjobs.com/{site}{path}",
         })
     return jobs
 
@@ -84,7 +95,7 @@ def fetch_generic_json(params):
     url = params["url"]
     r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
     r.raise_for_status()
-    data = r.json()
+    data = _parse_json(r)
     raw_jobs = _dig(data, params["jobs_path"])
     prefix = params.get("url_prefix", "")
     jobs = []
@@ -103,7 +114,7 @@ def fetch_ashby(params):
     url = f"https://api.ashbyhq.com/posting-api/job-board/{board}"
     r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
     r.raise_for_status()
-    data = r.json()
+    data = _parse_json(r)
     jobs = []
     for j in data.get("jobs", []):
         job_url = j.get("jobUrl", "")
