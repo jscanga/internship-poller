@@ -97,14 +97,9 @@
   exclude: []
 
 - name: "Google"
-  adapter: generic_json
+  adapter: google_html
   params:
-    url: "https://careers.google.com/api/v3/search/?q=%22software%20engineering%20intern%22&location=United%20States"
-    jobs_path: "jobs"
-    id_field: "job_id"
-    title_field: "title"
-    url_field: "apply_url"
-    url_prefix: ""
+    url: "https://www.google.com/about/careers/applications/jobs/results?q=intern&sort_by=date"  # VERIFY -- paste your actual search URL here if this 404s or returns nothing
   keywords: ["intern"]
   exclude: []
 
