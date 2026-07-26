@@ -37,7 +37,10 @@
     tenant: "draftkings"
     site: "DraftKings"
     wd: "wd1"
-    search_text: "intern"       # server-side search, avoids only-seeing-first-20-jobs problem
+    search_text: ""              # blank on purpose -- their ~80 total postings fit
+                                  # comfortably under our page cap, so we pull everything
+                                  # and let our own keyword filter do the work, rather than
+                                  # trust Workday's fuzzy relevance search to surface interns
   keywords: ["intern"]
   exclude: []
   us_only: true
