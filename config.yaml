@@ -6,7 +6,9 @@
 # adapter options:
 #   greenhouse  -> params: { slug: "companyname" }
 #   lever       -> params: { slug: "companyname" }
-#   workday     -> params: { tenant: "companyname", site: "SiteName" }
+#   workday     -> params: { tenant: "companyname", site: "SiteName", wd: "wd1" }
+#                  (the wd number varies per company -- wd1, wd5, wd12, etc -- check DevTools)
+#   ashby       -> params: { board: "boardname" }
 #   generic_json-> params: { url: "...", jobs_path: "jobs", id_field: "id",
 #                             title_field: "title", url_field: "url" }
 #
@@ -25,39 +27,43 @@
   exclude: []
 
 - name: "DraftKings"
-  adapter: greenhouse
+  adapter: workday
   params:
-    slug: "draftkings"          # VERIFY
+    tenant: "draftkings"
+    site: "DraftKings"
+    wd: "wd1"
   keywords: ["intern"]
   exclude: []
 
 - name: "Databricks"
   adapter: greenhouse
   params:
-    slug: "databricks"          # VERIFY
+    slug: "databricks"          # confirmed working
   keywords: ["intern"]
   exclude: []
 
 - name: "Snowflake"
-  adapter: greenhouse
+  adapter: ashby
   params:
-    slug: "snowflake"           # VERIFY
+    board: "snowflake"
   keywords: ["intern"]
   exclude: []
 
 - name: "Capital One"
   adapter: workday
   params:
-    tenant: "capitalone"        # VERIFY
-    site: "Capital_One"         # VERIFY
+    tenant: "capitalone"
+    site: "Capital_One"
+    wd: "wd12"                  # confirmed: they migrated off wd1 to wd12
   keywords: ["intern", "tip"]
   exclude: []
 
 - name: "Walmart"
   adapter: workday
   params:
-    tenant: "walmart"           # VERIFY
-    site: "WalmartExternal"     # VERIFY
+    tenant: "walmart"
+    site: "WalmartExternal"
+    wd: "wd5"                   # confirmed
   keywords: ["intern"]
   exclude: []
 
@@ -81,12 +87,12 @@
 - name: "Microsoft"
   adapter: generic_json
   params:
-    url: "https://gcsservices.careers.microsoft.com/search/api/v1/search?q=Explore&l=en_us&pg=1&pgSz=20&o=Recent"
-    jobs_path: "operationResult.result.jobs"
-    id_field: "jobId"
-    title_field: "title"
-    url_field: "jobId"
-    url_prefix: "https://careers.microsoft.com/us/en/job/"
+    url: "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&location=&start=0&num=20"
+    jobs_path: "data.positions"   # VERIFY -- Eightfold's PCSX API nests under "data", but field
+    id_field: "id"                 # names can vary slightly per deployment. If this comes back
+    title_field: "name"            # empty, open the search XHR in DevTools -> Response tab and
+    url_field: "id"                # check the actual key names, then tell me what they are.
+    url_prefix: "https://apply.careers.microsoft.com/careers?pid="
   keywords: ["intern", "explore"]
   exclude: []
 
