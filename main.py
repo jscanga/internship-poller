@@ -74,6 +74,8 @@ def main():
         exclude = company.get("exclude", [])
         matching = [j for j in jobs if matches_filters(j["title"], keywords, exclude)]
 
+        print(f"[info] {name}: fetched {len(jobs)} total posting(s), {len(matching)} matched keywords")
+
         seen_ids = set(cstate["seen_ids"])
         new_jobs = [j for j in matching if j["id"] not in seen_ids]
 
