@@ -50,7 +50,8 @@ def fetch_lever(params):
 def fetch_workday(params):
     tenant = params["tenant"]
     site = params["site"]
-    url = f"https://{tenant}.wd1.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs"
+    wd = params.get("wd", "wd1")  # e.g. "wd1", "wd5", "wd12" -- varies per company, check DevTools
+    url = f"https://{tenant}.{wd}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs"
     body = {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": ""}
     r = requests.post(url, headers=HEADERS, json=body, timeout=TIMEOUT)
     r.raise_for_status()
@@ -95,9 +96,27 @@ def fetch_generic_json(params):
     return jobs
 
 
+def fetch_ashby(params):
+    board = params["board"]
+    url = f"https://api.ashbyhq.com/posting-api/job-board/{board}"
+    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    data = r.json()
+    jobs = []
+    for j in data.get("jobs", []):
+        job_url = j.get("jobUrl", "")
+        jobs.append({
+            "id": job_url,        # Ashby's public API doesn't expose a bare job id, so the URL (which contains a UUID) doubles as one
+            "title": j.get("title", ""),
+            "url": job_url,
+        })
+    return jobs
+
+
 ADAPTERS = {
     "greenhouse": fetch_greenhouse,
     "lever": fetch_lever,
     "workday": fetch_workday,
+    "ashby": fetch_ashby,
     "generic_json": fetch_generic_json,
 }
