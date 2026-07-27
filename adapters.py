@@ -190,6 +190,40 @@ def fetch_google(params):
     return jobs
 
 
+def fetch_radancy(params):
+    """
+    Some companies (Capital One among them) run their public career search
+    through Radancy, which returns JSON with an embedded HTML fragment under
+    "results" rather than clean structured job objects. We regex the job
+    cards out of that fragment instead of a full HTML parser, since the
+    markup is simple and consistent (one <li> per job, with a data-job-id,
+    an <h2> title, and a job-location span).
+    """
+    import html as html_lib
+
+    url = params["url"]
+    base_url = params.get("base_url", "")
+    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    data = _parse_json(r)
+    results_html = data.get("results", "")
+
+    pattern = re.compile(
+        r'<a href="([^"]+)"[^>]*data-job-id="([^"]+)">.*?<h2>([^<]+)</h2>.*?'
+        r'<span class="job-location">([^<]+)</span>',
+        re.DOTALL,
+    )
+    jobs = []
+    for href, job_id, title, location in pattern.findall(results_html):
+        jobs.append({
+            "id": job_id,
+            "title": html_lib.unescape(title),
+            "url": base_url + href if href.startswith("/") else href,
+            "location": html_lib.unescape(location),
+        })
+    return jobs
+
+
 ADAPTERS = {
     "greenhouse": fetch_greenhouse,
     "lever": fetch_lever,
@@ -197,4 +231,5 @@ ADAPTERS = {
     "ashby": fetch_ashby,
     "generic_json": fetch_generic_json,
     "google_html": fetch_google,
+    "radancy": fetch_radancy,
 }
