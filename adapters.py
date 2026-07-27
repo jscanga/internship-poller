@@ -62,11 +62,27 @@ def fetch_lever(params):
 
 
 def fetch_workday(params):
+    """
+    Workday exposes two different public hosting patterns depending on how the
+    tenant is set up:
+      host_style "jobs" (default):  {tenant}.{wd}.myworkdayjobs.com/{site}
+      host_style "site":            {wd}.myworkdaysite.com/recruiting/{tenant}/{site}
+    Both hit the same CXS API path, just under a different base. Check the real
+    careers URL to know which one a company uses.
+    """
     tenant = params["tenant"]
     site = params["site"]
     wd = params.get("wd", "wd1")  # e.g. "wd1", "wd5", "wd12" -- varies per company, check DevTools
+    host_style = params.get("host_style", "jobs")
     search_text = params.get("search_text", "intern")  # server-side search avoids the 20-result page cap
-    url = f"https://{tenant}.{wd}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs"
+
+    if host_style == "site":
+        api_base = f"https://{wd}.myworkdaysite.com"
+        link_base = f"https://{wd}.myworkdaysite.com/recruiting/{tenant}/{site}"
+    else:
+        api_base = f"https://{tenant}.{wd}.myworkdayjobs.com"
+        link_base = f"https://{tenant}.{wd}.myworkdayjobs.com/{site}"
+    url = f"{api_base}/wday/cxs/{tenant}/{site}/jobs"
 
     jobs = []
     offset = 0
@@ -84,7 +100,7 @@ def fetch_workday(params):
             jobs.append({
                 "id": path or j.get("title", ""),
                 "title": j.get("title", ""),
-                "url": f"https://{tenant}.{wd}.myworkdayjobs.com/{site}{path}",
+                "url": f"{link_base}{path}",
                 "location": j.get("locationsText", ""),
             })
         if len(page_jobs) < page_size:
@@ -224,6 +240,81 @@ def fetch_radancy(params):
     return jobs
 
 
+def fetch_smartrecruiters(params):
+    """
+    SmartRecruiters has a documented public Posting API that needs no auth:
+      api.smartrecruiters.com/v1/companies/{companyId}/postings
+    Note: it's tier-dependent -- companies on lower SmartRecruiters plans don't
+    have the public feed enabled, in which case this 404s or returns nothing.
+    """
+    company = params["company"]
+    query = params.get("query", "intern")
+    url = f"https://api.smartrecruiters.com/v1/companies/{company}/postings"
+    all_jobs = []
+    offset = 0
+    limit = 100
+    for _ in range(5):
+        r = requests.get(
+            url,
+            headers=HEADERS,
+            params={"q": query, "limit": limit, "offset": offset},
+            timeout=TIMEOUT,
+        )
+        r.raise_for_status()
+        data = _parse_json(r)
+        content = data.get("content", [])
+        for j in content:
+            loc = j.get("location", {}) or {}
+            loc_parts = [loc.get("city", ""), loc.get("region", ""), loc.get("country", "")]
+            all_jobs.append({
+                "id": str(j.get("id", "")),
+                "title": j.get("name", ""),
+                "url": f"https://jobs.smartrecruiters.com/{company}/{j.get('id', '')}",
+                "location": ", ".join(p for p in loc_parts if p),
+            })
+        if len(content) < limit:
+            break
+        offset += limit
+    return all_jobs
+
+
+def fetch_oracle_cloud(params):
+    """
+    Oracle Fusion Cloud HCM "Candidate Experience" sites (JPMorgan among them).
+    The CE UI calls recruitingCEJobRequisitions unauthenticated, so we can too.
+
+    UNVERIFIED: I could not test this endpoint. The finder syntax is fiddly and
+    varies by Oracle version. If it errors or returns nothing, capture the real
+    request from DevTools on their careers site and we'll match it exactly.
+    """
+    host = params["host"]              # e.g. "jpmc.fa.oraclecloud.com"
+    site_number = params["site_number"]  # e.g. "CX_1001"
+    keyword = params.get("keyword", "intern")
+    url = f"https://{host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
+    finder = f"findReqs;siteNumber={site_number},keyword={keyword},limit=100"
+    r = requests.get(
+        url,
+        headers={**HEADERS, "Accept": "application/json"},
+        params={"onlyData": "true", "expand": "requisitionList", "finder": finder},
+        timeout=TIMEOUT,
+    )
+    r.raise_for_status()
+    data = _parse_json(r)
+
+    jobs = []
+    for item in data.get("items", []):
+        for req in item.get("requisitionList", []):
+            req_id = str(req.get("Id", ""))
+            locations = req.get("PrimaryLocation", "") or ""
+            jobs.append({
+                "id": req_id,
+                "title": req.get("Title", ""),
+                "url": f"https://{host}/hcmUI/CandidateExperience/en/sites/{site_number}/job/{req_id}",
+                "location": locations,
+            })
+    return jobs
+
+
 ADAPTERS = {
     "greenhouse": fetch_greenhouse,
     "lever": fetch_lever,
@@ -232,4 +323,6 @@ ADAPTERS = {
     "generic_json": fetch_generic_json,
     "google_html": fetch_google,
     "radancy": fetch_radancy,
+    "smartrecruiters": fetch_smartrecruiters,
+    "oracle_cloud": fetch_oracle_cloud,
 }
