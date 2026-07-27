@@ -138,3 +138,182 @@
   keywords: ["intern"]
   exclude: []
   us_only: true
+
+# ============================================================================
+# BATCH 2 -- finance / fintech
+#
+# Confidence levels below are honest:
+#   [confirmed]  I saw the real careers URL and it matches this config
+#   [likely]     strong indirect evidence, but not a URL I directly verified
+#   [unverified] my best construction of the endpoint; may need a DevTools fix
+#
+# Check the [info] log line after the first run. "fetched 0 total" on any of
+# these means the config is wrong, not that the company has no jobs.
+# ============================================================================
+
+# --- Workday tenants (all [confirmed] -- real URLs seen) -------------------
+
+- name: "Vanguard"
+  adapter: workday
+  params: { tenant: "vanguard", site: "vanguard_external", wd: "wd5", search_text: "intern" }
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Wells Fargo"
+  adapter: workday
+  params: { tenant: "wf", site: "WellsFargoJobs", wd: "wd1", search_text: "intern" }
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Morgan Stanley"
+  adapter: workday
+  params: { tenant: "ms", site: "External", wd: "wd5", search_text: "intern" }
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Mastercard"
+  adapter: workday
+  params: { tenant: "mastercard", site: "CorporateCareers", wd: "wd1", search_text: "intern" }
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "PayPal"
+  adapter: workday
+  params: { tenant: "paypal", site: "jobs", wd: "wd1", search_text: "intern" }
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Dell"
+  adapter: workday
+  params: { tenant: "dell", site: "External", wd: "wd1", search_text: "intern" }
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Citi"
+  adapter: workday
+  params: { tenant: "citi", site: "2", wd: "wd5", search_text: "intern" }
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+# Fidelity uses Workday's OTHER hosting pattern (myworkdaysite.com), hence host_style.
+# Note: "fmr" is Fidelity Investments (US). Don't confuse with "fil" = Fidelity
+# International, a separate company with its own board.
+- name: "Fidelity"
+  adapter: workday
+  params:
+    tenant: "fmr"
+    site: "FidelityCareers"
+    wd: "wd1"
+    host_style: "site"
+    search_text: "intern"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+# --- Greenhouse ------------------------------------------------------------
+
+- name: "Stripe"
+  adapter: greenhouse
+  params: { slug: "stripe" }        # [confirmed]
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Coinbase"
+  adapter: greenhouse
+  params: { slug: "coinbase" }      # [confirmed]
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Robinhood"
+  adapter: greenhouse
+  params: { slug: "robinhood" }     # [likely]
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Plaid"
+  adapter: greenhouse
+  params: { slug: "plaid" }         # [unverified] -- best guess
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+# --- SmartRecruiters -------------------------------------------------------
+
+- name: "Visa"
+  adapter: smartrecruiters
+  params: { company: "Visa", query: "intern" }     # [confirmed]
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Block"
+  adapter: smartrecruiters
+  params: { company: "Square", query: "intern" }   # [likely] -- Block still posts under "Square"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+# --- Eightfold (same platform as Microsoft) --------------------------------
+
+- name: "American Express"
+  adapter: generic_json
+  params:
+    url: "https://aexp.eightfold.ai/api/apply/v2/jobs?domain=aexp.com&hl=en&query=intern&start=0&num=50"
+    jobs_path: "positions"
+    id_field: "id"
+    title_field: "name"
+    url_field: "id"
+    url_prefix: "https://aexp.eightfold.ai/careers?pid="
+    location_field: "location"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+# --- Oracle Cloud HCM ------------------------------------------------------
+
+# [unverified] JPMorgan is on Oracle Fusion CE. The finder param syntax varies
+# by Oracle version -- if this fails, grab the real request from DevTools.
+- name: "JPMorganChase"
+  adapter: oracle_cloud
+  params:
+    host: "jpmc.fa.oraclecloud.com"
+    site_number: "CX_1001"
+    keyword: "intern"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+# ============================================================================
+# NOT YET CONFIGURED -- I couldn't identify these with confidence.
+# For each: open their careers page, find the job search, and check the URL /
+# DevTools Network tab for one of these signatures:
+#   boards.greenhouse.io/<slug>        -> adapter: greenhouse
+#   jobs.lever.co/<slug>               -> adapter: lever
+#   jobs.ashbyhq.com/<board>           -> adapter: ashby
+#   <tenant>.wdN.myworkdayjobs.com     -> adapter: workday
+#   wdN.myworkdaysite.com/recruiting/  -> adapter: workday, host_style: "site"
+#   jobs.smartrecruiters.com/<Company> -> adapter: smartrecruiters
+#   <co>.eightfold.ai / api/pcsx/      -> adapter: generic_json (copy Microsoft's block)
+#   ?ActiveFacetID=...&FacetFilters    -> adapter: radancy (copy Capital One's block)
+#
+#   PNC
+#   BNY
+#   Bank of America
+#   Nasdaq
+#   S&P Global
+#   Intuit
+#   Goldman Sachs
+#
+# Bloomberg runs on Avature (bloomberg.avature.net), which is server-rendered
+# HTML with no JSON API -- same wall we hit with IBM. Skipping for now.
+# ============================================================================
