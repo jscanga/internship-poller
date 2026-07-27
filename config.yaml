@@ -9,6 +9,10 @@
 #   workday     -> params: { tenant: "companyname", site: "SiteName", wd: "wd1" }
 #                  (the wd number varies per company -- wd1, wd5, wd12, etc -- check DevTools)
 #   ashby       -> params: { board: "boardname" }
+#   radancy     -> params: { url: "...", base_url: "https://companycareers.com" }
+#                  (url is the full captured "?ActiveFacetID=Internship&..." request --
+#                  a Radancy-platform career search filtered to internships. Job links
+#                  in the response are relative, so base_url is prepended to make them clickable.)
 #   generic_json-> params: { url: "...", jobs_path: "jobs", id_field: "id",
 #                             title_field: "title", url_field: "url" }
 #
@@ -62,12 +66,10 @@
   us_only: true
 
 - name: "Capital One"
-  adapter: workday
+  adapter: radancy
   params:
-    tenant: "capitalone"
-    site: "Capital_One"
-    wd: "wd12"                  # confirmed: they migrated off wd1 to wd12
-    search_text: "intern"
+    url: "https://www.capitalonecareers.com/search-jobs/results?ActiveFacetID=Internship&CurrentPage=1&RecordsPerPage=50&TotalContentResults=&Distance=50&RadiusUnitType=0&Keywords=intern&Location=&ShowRadius=False&IsPagination=False&CustomFacetName=&FacetTerm=&FacetType=0&FacetFilters%5B0%5D.ID=Internship&FacetFilters%5B0%5D.FacetType=5&FacetFilters%5B0%5D.Count=2&FacetFilters%5B0%5D.Display=Internship&FacetFilters%5B0%5D.IsApplied=true&FacetFilters%5B0%5D.FieldName=industry&SearchResultsModuleName=Search+Results&SearchFiltersModuleName=Search+Filters&SortCriteria=0&SortDirection=0&SearchType=1&PostalCode=&ResultsType=0&fc=&fl=&fcf=&afc=&afl=&afcf=&TotalContentPages=NaN"
+    base_url: "https://www.capitalonecareers.com"
   keywords: ["intern", "tip"]
   exclude: []
   us_only: true
