@@ -204,13 +204,18 @@
   us_only: true
 
 - name: "Dell"
-  adapter: radancy
+  adapter: oracle_cloud
   params:
-    # [unverified] Dell is on Radancy (jobs.dell.com), NOT Workday. This is a
-    # plain keyword search rather than a facet filter; if it misses things,
-    # capture the real filtered request from DevTools like we did for Capital One.
-    url: "https://jobs.dell.com/search-jobs/results?Keywords=intern&CurrentPage=1&RecordsPerPage=50&SearchType=1&SortCriteria=0&SortDirection=0"
-    base_url: "https://jobs.dell.com"
+    # [confirmed via DevTools] Dell runs Oracle Cloud HCM, NOT Radancy as
+    # originally guessed from jobs.dell.com's URL structure -- that was two
+    # wrong guesses before finding this. SiteNumber confirmed directly in a
+    # real response body. TotalJobsCount was 44 for keyword=intern + this
+    # location filter, comfortably within one page (page_size=100).
+    host: "iawmqy.fa.ocs.oraclecloud.com"
+    site_number: "CX_1001"
+    keyword: "intern"
+    location_id: "300000000471434"   # from a real captured request; assumed to mean United States, not independently confirmed
+    max_pages: 3
   keywords: ["intern"]
   exclude: []
   us_only: true
