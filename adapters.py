@@ -84,11 +84,13 @@ def fetch_workday(params):
         link_base = f"https://{tenant}.{wd}.myworkdayjobs.com/{site}"
     url = f"{api_base}/wday/cxs/{tenant}/{site}/jobs"
 
+    max_pages = params.get("max_pages", 10)
     jobs = []
     offset = 0
     page_size = 20
     total_reported = None
-    for _ in range(10):  # cap at 200 postings (10 pages)
+    hit_cap = False
+    for i in range(max_pages):
         body = {"appliedFacets": {}, "limit": page_size, "offset": offset, "searchText": search_text}
         r = requests.post(url, headers=HEADERS, json=body, timeout=TIMEOUT)
         r.raise_for_status()
@@ -106,13 +108,15 @@ def fetch_workday(params):
         if len(page_jobs) < page_size:
             break  # last page
         offset += page_size
+        if i == max_pages - 1:
+            hit_cap = True
 
     print(f"[debug] workday {tenant}/{site}: reported total={total_reported}, fetched={len(jobs)}")
-    if total_reported and total_reported > len(jobs) * 3:
+    if hit_cap:
         print(
-            f"[warn] workday {tenant}/{site}: total ({total_reported}) is much larger than what "
-            f"we fetched ({len(jobs)}) -- searchText='{search_text}' likely isn't filtering "
-            f"server-side, so postings beyond page {len(jobs)//page_size} could be missed"
+            f"[warn] workday {tenant}/{site}: hit the {max_pages}-page cap at {len(jobs)} postings "
+            f"and there are likely more. Coverage is partial -- raise max_pages for this company "
+            f"if it's a priority target."
         )
     return jobs
 
@@ -245,23 +249,26 @@ def fetch_smartrecruiters(params):
     SmartRecruiters has a documented public Posting API that needs no auth:
       api.smartrecruiters.com/v1/companies/{companyId}/postings
     Note: it's tier-dependent -- companies on lower SmartRecruiters plans don't
-    have the public feed enabled, in which case this 404s or returns nothing.
+    have the public feed enabled, in which case this returns nothing.
+
+    query defaults to blank (pull the whole board, filter locally). Their
+    server-side q= search proved unreliable elsewhere, so we don't lean on it.
     """
     company = params["company"]
-    query = params.get("query", "intern")
+    query = params.get("query", "")
     url = f"https://api.smartrecruiters.com/v1/companies/{company}/postings"
     all_jobs = []
     offset = 0
     limit = 100
-    for _ in range(5):
-        r = requests.get(
-            url,
-            headers=HEADERS,
-            params={"q": query, "limit": limit, "offset": offset},
-            timeout=TIMEOUT,
-        )
+    total_found = None
+    for _ in range(10):
+        req_params = {"limit": limit, "offset": offset}
+        if query:
+            req_params["q"] = query
+        r = requests.get(url, headers=HEADERS, params=req_params, timeout=TIMEOUT)
         r.raise_for_status()
         data = _parse_json(r)
+        total_found = data.get("totalFound", total_found)
         content = data.get("content", [])
         for j in content:
             loc = j.get("location", {}) or {}
@@ -275,6 +282,8 @@ def fetch_smartrecruiters(params):
         if len(content) < limit:
             break
         offset += limit
+
+    print(f"[debug] smartrecruiters {company}: totalFound={total_found}, fetched={len(all_jobs)}")
     return all_jobs
 
 
