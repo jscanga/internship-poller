@@ -5,26 +5,27 @@
 #
 # adapter options:
 #   greenhouse  -> params: { slug: "companyname" }
-#   lever       -> params: { slug: "companyname" }
-#   workday     -> params: { tenant: "companyname", site: "SiteName", wd: "wd1" }
-#                  (the wd number varies per company -- wd1, wd5, wd12, etc -- check DevTools)
 #   ashby       -> params: { board: "boardname" }
+#   workday     -> params: { tenant: "companyname", site: "SiteName", wd: "wd1" }
+#                  (the wd number varies per company -- wd1, wd5, wd12, etc -- check DevTools.
+#                  search_text defaults to "intern" but has proven unreliable at some
+#                  companies -- see DraftKings below, which sets it blank on purpose.
+#                  max_pages defaults to 10 (200 postings); raise it if a company's
+#                  catalog is bigger and you're missing postings.)
 #   radancy     -> params: { url: "...", base_url: "https://companycareers.com" }
 #                  (url is the full captured "?ActiveFacetID=Internship&..." request --
-#                  a Radancy-platform career search filtered to internships. Job links
-#                  in the response are relative, so base_url is prepended to make them clickable.)
+#                  a Radancy-platform career search filtered to internships.)
 #   generic_json-> params: { url: "...", jobs_path: "jobs", id_field: "id",
-#                             title_field: "title", url_field: "url" }
+#                             title_field: "title", url_field: "url",
+#                             location_field: "location" (optional) }
 #
-# keywords: job title must contain at least one of these (case-insensitive)
+# keywords: job title must contain at least one of these (case-insensitive,
+#           matches "intern"/"interns"/"internship"/"internships" as one word,
+#           but never matches inside "International" or "Internals")
 # exclude:  job title must NOT contain any of these
 # us_only:  if true, rejects postings whose location clearly names a non-US
 #           country/city (a blocklist, not an allowlist) -- blank/unknown
 #           locations are always kept rather than risk dropping a real US role.
-#           Default is false (no location filtering) if omitted.
-#
-# VERIFY = I'm not certain this slug/tenant is correct. See README for how
-# to confirm it in under 5 minutes before you trust that company's alerts.
 # ============================================================================
 
 - name: "Duolingo"
@@ -35,24 +36,34 @@
   exclude: []
   us_only: true
 
-- name: "DraftKings"
-  adapter: workday
+- name: "Databricks"
+  adapter: greenhouse
   params:
-    tenant: "draftkings"
-    site: "DraftKings"
-    wd: "wd1"
-    search_text: ""              # blank on purpose -- their ~80 total postings fit
-                                  # comfortably under our page cap, so we pull everything
-                                  # and let our own keyword filter do the work, rather than
-                                  # trust Workday's fuzzy relevance search to surface interns
+    slug: "databricks"
   keywords: ["intern"]
   exclude: []
   us_only: true
 
-- name: "Databricks"
+- name: "Stripe"
   adapter: greenhouse
   params:
-    slug: "databricks"          # confirmed working
+    slug: "stripe"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Coinbase"
+  adapter: greenhouse
+  params:
+    slug: "coinbase"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Robinhood"
+  adapter: greenhouse
+  params:
+    slug: "robinhood"
   keywords: ["intern"]
   exclude: []
   us_only: true
@@ -61,6 +72,20 @@
   adapter: ashby
   params:
     board: "snowflake"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "DraftKings"
+  adapter: workday
+  params:
+    tenant: "draftkings"
+    site: "DraftKings"
+    wd: "wd1"
+    search_text: ""    # blank on purpose -- their ~85 total postings fit comfortably
+                        # under our page cap, so we pull everything and let our own
+                        # keyword filter do the work, rather than trust Workday's
+                        # fuzzy relevance search to surface interns
   keywords: ["intern"]
   exclude: []
   us_only: true
@@ -74,22 +99,6 @@
   exclude: []
   us_only: true
 
-- name: "Walmart"
-  adapter: workday
-  params:
-    tenant: "walmart"
-    site: "WalmartExternal"
-    wd: "wd5"                   # confirmed
-    search_text: "intern"
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-# The big three (Amazon/Microsoft/Google) and IBM run their own bespoke
-# career search backends rather than a standard ATS. generic_json works,
-# but you MUST inspect the real request shape yourself (see README "Big Tech"
-# section) -- these params are placeholders, not verified endpoints.
-
 - name: "Amazon"
   adapter: generic_json
   params:
@@ -99,7 +108,7 @@
     title_field: "title"
     url_field: "job_path"
     url_prefix: "https://www.amazon.jobs"
-    location_field: "normalized_location"   # VERIFY -- best guess, check a raw response if us_only seems to over/under-filter
+    location_field: "normalized_location"
   keywords: ["intern"]
   exclude: []
   us_only: true
@@ -108,12 +117,12 @@
   adapter: generic_json
   params:
     url: "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&location=&start=0&num=20"
-    jobs_path: "data.positions"   # VERIFY -- Eightfold's PCSX API nests under "data", but field
-    id_field: "id"                 # names can vary slightly per deployment. If this comes back
-    title_field: "name"            # empty, open the search XHR in DevTools -> Response tab and
-    url_field: "id"                # check the actual key names, then tell me what they are.
+    jobs_path: "data.positions"
+    id_field: "id"
+    title_field: "name"
+    url_field: "id"
     url_prefix: "https://apply.careers.microsoft.com/careers?pid="
-    location_field: "location"    # VERIFY -- best guess, same caveat as jobs_path/title_field above
+    location_field: "location"
   keywords: ["intern", "explore"]
   exclude: []
   us_only: true
@@ -121,199 +130,7 @@
 - name: "Google"
   adapter: google_html
   params:
-    url: "https://www.google.com/about/careers/applications/jobs/results?q=intern&sort_by=date"  # VERIFY -- paste your actual search URL here if this 404s or returns nothing
+    url: "https://www.google.com/about/careers/applications/jobs/results?q=intern&sort_by=date"   # VERIFY -- still my guess, swap in your real search URL
   keywords: ["intern"]
   exclude: []
   us_only: true
-
-- name: "IBM"
-  adapter: generic_json
-  params:
-    url: "https://www.ibm.com/careers/api/search?field_keyword=intern"    # VERIFY - placeholder
-    jobs_path: "jobs"
-    id_field: "id"
-    title_field: "title"
-    url_field: "url"
-    url_prefix: ""
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-# ============================================================================
-# BATCH 2 -- finance / fintech
-#
-# Confidence levels below are honest:
-#   [confirmed]  I saw the real careers URL and it matches this config
-#   [likely]     strong indirect evidence, but not a URL I directly verified
-#   [unverified] my best construction of the endpoint; may need a DevTools fix
-#
-# Check the [info] log line after the first run. "fetched 0 total" on any of
-# these means the config is wrong, not that the company has no jobs.
-# ============================================================================
-
-# --- Workday tenants (all [confirmed] -- real URLs seen) -------------------
-
-- name: "Vanguard"
-  adapter: workday
-  params: { max_pages: 25, tenant: "vanguard", site: "vanguard_external", wd: "wd5", search_text: "intern" }
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "Wells Fargo"
-  adapter: workday
-  params: { max_pages: 25, tenant: "wf", site: "WellsFargoJobs", wd: "wd1", search_text: "intern" }
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "Morgan Stanley"
-  adapter: workday
-  params: { max_pages: 25, tenant: "ms", site: "External", wd: "wd5", search_text: "intern" }
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "Mastercard"
-  adapter: workday
-  params: { max_pages: 25, tenant: "mastercard", site: "CorporateCareers", wd: "wd1", search_text: "intern" }
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "PayPal"
-  adapter: workday
-  params: { tenant: "paypal", site: "jobs", wd: "wd1", search_text: "intern" }
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "Dell"
-  adapter: workday
-  params: { tenant: "dell", site: "External", wd: "wd1", search_text: "intern" }
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "Citi"
-  adapter: workday
-  params: { max_pages: 25, tenant: "citi", site: "2", wd: "wd5", search_text: "intern" }
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-# Fidelity uses Workday's OTHER hosting pattern (myworkdaysite.com), hence host_style.
-# Note: "fmr" is Fidelity Investments (US). Don't confuse with "fil" = Fidelity
-# International, a separate company with its own board.
-- name: "Fidelity"
-  adapter: workday
-  params:
-    tenant: "fmr"
-    site: "FidelityCareers"
-    wd: "wd1"
-    host_style: "site"
-    search_text: "intern"
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-# --- Greenhouse ------------------------------------------------------------
-
-- name: "Stripe"
-  adapter: greenhouse
-  params: { slug: "stripe" }        # [confirmed]
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "Coinbase"
-  adapter: greenhouse
-  params: { slug: "coinbase" }      # [confirmed]
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "Robinhood"
-  adapter: greenhouse
-  params: { slug: "robinhood" }     # [likely]
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "Plaid"
-  adapter: ashby
-  params: { board: "plaid" }        # [confirmed] jobs.ashbyhq.com/plaid
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-# --- SmartRecruiters -------------------------------------------------------
-
-- name: "Visa"
-  adapter: smartrecruiters
-  params: { company: "Visa" }     # [confirmed] -- query blank on purpose, pull whole board
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-- name: "Block"
-  adapter: smartrecruiters
-  params: { company: "Square" }   # [likely] -- Block still posts under "Square"
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-# --- Eightfold (same platform as Microsoft) --------------------------------
-
-- name: "American Express"
-  adapter: generic_json
-  params:
-    url: "https://aexp.eightfold.ai/api/apply/v2/jobs?domain=aexp.com&hl=en&query=intern&start=0&num=50"
-    jobs_path: "positions"
-    id_field: "id"
-    title_field: "name"
-    url_field: "id"
-    url_prefix: "https://aexp.eightfold.ai/careers?pid="
-    location_field: "location"
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-# --- Oracle Cloud HCM ------------------------------------------------------
-
-# [unverified] JPMorgan is on Oracle Fusion CE. The finder param syntax varies
-# by Oracle version -- if this fails, grab the real request from DevTools.
-- name: "JPMorganChase"
-  adapter: oracle_cloud
-  params:
-    host: "jpmc.fa.oraclecloud.com"
-    site_number: "CX_1001"
-    keyword: "intern"
-  keywords: ["intern"]
-  exclude: []
-  us_only: true
-
-# ============================================================================
-# NOT YET CONFIGURED -- I couldn't identify these with confidence.
-# For each: open their careers page, find the job search, and check the URL /
-# DevTools Network tab for one of these signatures:
-#   boards.greenhouse.io/<slug>        -> adapter: greenhouse
-#   jobs.lever.co/<slug>               -> adapter: lever
-#   jobs.ashbyhq.com/<board>           -> adapter: ashby
-#   <tenant>.wdN.myworkdayjobs.com     -> adapter: workday
-#   wdN.myworkdaysite.com/recruiting/  -> adapter: workday, host_style: "site"
-#   jobs.smartrecruiters.com/<Company> -> adapter: smartrecruiters
-#   <co>.eightfold.ai / api/pcsx/      -> adapter: generic_json (copy Microsoft's block)
-#   ?ActiveFacetID=...&FacetFilters    -> adapter: radancy (copy Capital One's block)
-#
-#   PNC
-#   BNY
-#   Bank of America
-#   Nasdaq
-#   S&P Global
-#   Intuit
-#   Goldman Sachs
-#
-# Bloomberg runs on Avature (bloomberg.avature.net), which is server-rendered
-# HTML with no JSON API -- same wall we hit with IBM. Skipping for now.
-# ============================================================================
