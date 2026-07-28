@@ -236,6 +236,34 @@
   exclude: []
   us_only: true
 
+- name: "American Express"
+  adapter: oracle_cloud
+  params:
+    # [confirmed via DevTools] AmEx is on Oracle Cloud HCM, NOT Eightfold as
+    # originally guessed. TotalJobsCount was 90 for keyword="intern" + this
+    # location filter (US, confirmed via PrimaryLocationCountry in the real
+    # response) -- comfortably covered by a few pages.
+    host: "egug.fa.us2.oraclecloud.com"
+    site_number: "CX_1"
+    keyword: "intern"
+    location_id: "300000000229164"   # confirmed = US via PrimaryLocationCountry in response
+    max_pages: 3
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Block"
+  adapter: block_svelte
+  params:
+    # [confirmed via View Source] Block/Square/Cash App run SvelteKit. The
+    # employeeTypes[]=Intern filter here is a real, checkbox-driven server-side
+    # filter -- unlike the fuzzy "keyword=intern" searches elsewhere, every
+    # result returned here is guaranteed to genuinely be an internship.
+    url: "https://block.xyz/careers/jobs?businessUnits%5B%5D=square&businessUnits%5B%5D=block&businessUnits%5B%5D=cashapp&employeeTypes%5B%5D=Intern"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
 - name: "Google"
   adapter: google_html
   params:
