@@ -233,6 +233,42 @@ def fetch_radancy(params):
     return jobs
 
 
+def fetch_oracle_cloud(params):
+    """
+    Oracle Fusion Cloud HCM "Candidate Experience" sites (JPMorgan, BNY among
+    them). The CE UI calls recruitingCEJobRequisitions unauthenticated, so we
+    can too. This worked for JPMorgan despite being an unverified guess, so
+    it's a reasonable pattern to reuse -- but site_number naming varies
+    (numeric like "CX_1001" vs a string like "BNY-Careers"), so double check
+    against the real careers URL if it returns nothing.
+    """
+    host = params["host"]                # e.g. "jpmc.fa.oraclecloud.com"
+    site_number = params["site_number"]  # e.g. "CX_1001" or "BNY-Careers"
+    keyword = params.get("keyword", "intern")
+    url = f"https://{host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
+    finder = f"findReqs;siteNumber={site_number},keyword={keyword},limit=100"
+    r = requests.get(
+        url,
+        headers={**HEADERS, "Accept": "application/json"},
+        params={"onlyData": "true", "expand": "requisitionList", "finder": finder},
+        timeout=TIMEOUT,
+    )
+    r.raise_for_status()
+    data = _parse_json(r)
+
+    jobs = []
+    for item in data.get("items", []):
+        for req in item.get("requisitionList", []):
+            req_id = str(req.get("Id", ""))
+            jobs.append({
+                "id": req_id,
+                "title": req.get("Title", ""),
+                "url": f"https://{host}/hcmUI/CandidateExperience/en/sites/{site_number}/job/{req_id}",
+                "location": req.get("PrimaryLocation", "") or "",
+            })
+    return jobs
+
+
 ADAPTERS = {
     "greenhouse": fetch_greenhouse,
     "workday": fetch_workday,
@@ -240,4 +276,5 @@ ADAPTERS = {
     "generic_json": fetch_generic_json,
     "google_html": fetch_google,
     "radancy": fetch_radancy,
+    "oracle_cloud": fetch_oracle_cloud,
 }
