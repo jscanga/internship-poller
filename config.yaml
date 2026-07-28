@@ -155,28 +155,28 @@
 
 - name: "Vanguard"
   adapter: workday
-  params: { tenant: "vanguard", site: "vanguard_external", wd: "wd5", search_text: "intern" }
+  params: { max_pages: 25, tenant: "vanguard", site: "vanguard_external", wd: "wd5", search_text: "intern" }
   keywords: ["intern"]
   exclude: []
   us_only: true
 
 - name: "Wells Fargo"
   adapter: workday
-  params: { tenant: "wf", site: "WellsFargoJobs", wd: "wd1", search_text: "intern" }
+  params: { max_pages: 25, tenant: "wf", site: "WellsFargoJobs", wd: "wd1", search_text: "intern" }
   keywords: ["intern"]
   exclude: []
   us_only: true
 
 - name: "Morgan Stanley"
   adapter: workday
-  params: { tenant: "ms", site: "External", wd: "wd5", search_text: "intern" }
+  params: { max_pages: 25, tenant: "ms", site: "External", wd: "wd5", search_text: "intern" }
   keywords: ["intern"]
   exclude: []
   us_only: true
 
 - name: "Mastercard"
   adapter: workday
-  params: { tenant: "mastercard", site: "CorporateCareers", wd: "wd1", search_text: "intern" }
+  params: { max_pages: 25, tenant: "mastercard", site: "CorporateCareers", wd: "wd1", search_text: "intern" }
   keywords: ["intern"]
   exclude: []
   us_only: true
@@ -197,7 +197,7 @@
 
 - name: "Citi"
   adapter: workday
-  params: { tenant: "citi", site: "2", wd: "wd5", search_text: "intern" }
+  params: { max_pages: 25, tenant: "citi", site: "2", wd: "wd5", search_text: "intern" }
   keywords: ["intern"]
   exclude: []
   us_only: true
@@ -241,8 +241,8 @@
   us_only: true
 
 - name: "Plaid"
-  adapter: greenhouse
-  params: { slug: "plaid" }         # [unverified] -- best guess
+  adapter: ashby
+  params: { board: "plaid" }        # [confirmed] jobs.ashbyhq.com/plaid
   keywords: ["intern"]
   exclude: []
   us_only: true
@@ -251,14 +251,14 @@
 
 - name: "Visa"
   adapter: smartrecruiters
-  params: { company: "Visa", query: "intern" }     # [confirmed]
+  params: { company: "Visa" }     # [confirmed] -- query blank on purpose, pull whole board
   keywords: ["intern"]
   exclude: []
   us_only: true
 
 - name: "Block"
   adapter: smartrecruiters
-  params: { company: "Square", query: "intern" }   # [likely] -- Block still posts under "Square"
+  params: { company: "Square" }   # [likely] -- Block still posts under "Square"
   keywords: ["intern"]
   exclude: []
   us_only: true
