@@ -237,35 +237,75 @@ def fetch_oracle_cloud(params):
     """
     Oracle Fusion Cloud HCM "Candidate Experience" sites (JPMorgan, BNY among
     them). The CE UI calls recruitingCEJobRequisitions unauthenticated, so we
-    can too. This worked for JPMorgan despite being an unverified guess, so
-    it's a reasonable pattern to reuse -- but site_number naming varies
-    (numeric like "CX_1001" vs a string like "BNY-Careers"), so double check
-    against the real careers URL if it returns nothing.
+    can too.
+
+    keyword= is unreliable the same way Workday's searchText is -- it may not
+    actually narrow results server-side. workLocationCountryCode IS a
+    documented, real finder parameter though (unlike company-specific opaque
+    facet IDs), so we use that as a genuine chokepoint when country_code is
+    set. sortBy=POSTING_DATES_DESC surfaces newest postings first, which pairs
+    well with our own new-vs-seen diffing even without a real date filter.
     """
     host = params["host"]                # e.g. "jpmc.fa.oraclecloud.com"
     site_number = params["site_number"]  # e.g. "CX_1001" or "BNY-Careers"
     keyword = params.get("keyword", "intern")
-    url = f"https://{host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
-    finder = f"findReqs;siteNumber={site_number},keyword={keyword},limit=100"
-    r = requests.get(
-        url,
-        headers={**HEADERS, "Accept": "application/json"},
-        params={"onlyData": "true", "expand": "requisitionList", "finder": finder},
-        timeout=TIMEOUT,
-    )
-    r.raise_for_status()
-    data = _parse_json(r)
+    country_code = params.get("country_code")  # e.g. "US" -- real server-side filter
+    max_pages = params.get("max_pages", 5)
+    page_size = 100
 
+    url = f"https://{host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
     jobs = []
-    for item in data.get("items", []):
-        for req in item.get("requisitionList", []):
-            req_id = str(req.get("Id", ""))
-            jobs.append({
-                "id": req_id,
-                "title": req.get("Title", ""),
-                "url": f"https://{host}/hcmUI/CandidateExperience/en/sites/{site_number}/job/{req_id}",
-                "location": req.get("PrimaryLocation", "") or "",
-            })
+    offset = 0
+    hit_cap = False
+    for i in range(max_pages):
+        finder_parts = [
+            f"siteNumber={site_number}",
+            f"keyword={keyword}",
+            "sortBy=POSTING_DATES_DESC",
+            f"limit={page_size}",
+            f"offset={offset}",
+        ]
+        if country_code:
+            finder_parts.insert(2, f"workLocationCountryCode={country_code}")
+        finder = "findReqs;" + ",".join(finder_parts)
+
+        r = requests.get(
+            url,
+            headers={
+                **HEADERS,
+                "Accept": "application/json",
+                "ora-irc-cx-userid": "intern-watch-bot",
+                "ora-irc-language": "en",
+            },
+            params={"onlyData": "true", "expand": "requisitionList", "finder": finder},
+            timeout=TIMEOUT,
+        )
+        r.raise_for_status()
+        data = _parse_json(r)
+
+        page_jobs = []
+        for item in data.get("items", []):
+            for req in item.get("requisitionList", []):
+                req_id = str(req.get("Id", ""))
+                page_jobs.append({
+                    "id": req_id,
+                    "title": req.get("Title", ""),
+                    "url": f"https://{host}/hcmUI/CandidateExperience/en/sites/{site_number}/job/{req_id}",
+                    "location": req.get("PrimaryLocation", "") or "",
+                })
+        jobs.extend(page_jobs)
+        if len(page_jobs) < page_size:
+            break
+        offset += page_size
+        if i == max_pages - 1:
+            hit_cap = True
+
+    print(f"[debug] oracle_cloud {host}/{site_number}: fetched={len(jobs)}")
+    if hit_cap:
+        print(
+            f"[warn] oracle_cloud {host}/{site_number}: hit the {max_pages}-page cap at "
+            f"{len(jobs)} postings -- there may be more."
+        )
     return jobs
 
 
