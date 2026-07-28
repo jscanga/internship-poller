@@ -310,7 +310,7 @@ def fetch_oracle_cloud(params):
                     "id": req_id,
                     "title": req.get("Title", ""),
                     "url": f"https://{host}/hcmUI/CandidateExperience/en/sites/{site_number}/job/{req_id}",
-                    "location": req.get("PrimaryLocation", "") or "",
+                    "location": req.get("PrimaryLocationCountry", "") or "",
                 })
         jobs.extend(page_jobs)
         if len(page_jobs) < page_size:
@@ -328,6 +328,42 @@ def fetch_oracle_cloud(params):
     return jobs
 
 
+def fetch_block_svelte(params):
+    """
+    Block/Square/Cash App's careers site is SvelteKit-powered. Their client-side
+    navigation endpoint (__data.json) uses a fragile index-graph serialization
+    (devalue) that's a pain to parse reliably and doesn't always return complete
+    data to a cold request (it assumes browser-side caching). BUT a fresh full
+    page load embeds the complete data as plain, directly-readable JS object
+    literals in an inline <script> tag (in the kit.start(...) hydration call) --
+    no index resolution needed, just regex out the job objects directly.
+    """
+    url = params["url"]
+    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    html = r.text
+
+    # each job object has this exact field order/shape in the hydration script
+    pattern = re.compile(
+        r'\{id:(\d+),internalId:\d+,requisitionId:"[^"]*",'
+        r'title:"((?:[^"\\]|\\.)*)",bu:"([^"]*)",employeeType:"([^"]*)",'
+        r'jobFunction:"[^"]*",isRemote:(?:true|false),location:"([^"]*)"'
+    )
+    jobs = []
+    seen = set()
+    for job_id, title, bu, employee_type, location in pattern.findall(html):
+        if job_id in seen:
+            continue
+        seen.add(job_id)
+        jobs.append({
+            "id": job_id,
+            "title": title.replace('\\"', '"'),
+            "url": f"https://block.xyz/careers/jobs/{job_id}",
+            "location": location,
+        })
+    return jobs
+
+
 ADAPTERS = {
     "greenhouse": fetch_greenhouse,
     "workday": fetch_workday,
@@ -336,4 +372,5 @@ ADAPTERS = {
     "google_html": fetch_google,
     "radancy": fetch_radancy,
     "oracle_cloud": fetch_oracle_cloud,
+    "block_svelte": fetch_block_svelte,
 }
