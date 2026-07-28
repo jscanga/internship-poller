@@ -124,7 +124,11 @@ def _dig(data, dotted_path):
 
 def fetch_generic_json(params):
     url = params["url"]
-    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+    method = params.get("method", "GET").upper()
+    if method == "POST":
+        r = requests.post(url, headers=HEADERS, json=params.get("body", {}), timeout=TIMEOUT)
+    else:
+        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
     r.raise_for_status()
     data = _parse_json(r)
     raw_jobs = _dig(data, params["jobs_path"])
