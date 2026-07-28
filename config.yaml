@@ -154,14 +154,17 @@
 - name: "BNY"
   adapter: oracle_cloud
   params:
-    # [confirmed via DevTools] site_number is CX_3001 -- NOT "BNY-Careers" as
-    # the URL slug suggested. locationId=300000000378743 is BNY's specific
-    # opaque facet ID for United States (workLocationCountryCode from Oracle's
-    # docs didn't actually work for this tenant, despite being documented).
+    # [confirmed via DevTools] site_number=CX_3001, locationId=300000000378743
+    # (US) are both real. The 500 wasn't a bug -- BNY genuinely has that many
+    # postings matching keyword="intern" broadly (not title-only) without a
+    # date filter. posting_days=7 is the real chokepoint: a genuine server-side
+    # filter that also happens to be exactly what we want, since we only care
+    # about postings new enough to matter.
     host: "eofe.fa.us2.oraclecloud.com"
     site_number: "CX_3001"
     keyword: "intern"
     location_id: "300000000378743"
+    posting_days: 7
     max_pages: 5
   keywords: ["intern"]
   exclude: []
