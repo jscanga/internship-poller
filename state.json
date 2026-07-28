@@ -10,16 +10,22 @@
     },
     "Databricks": {
       "seen_ids": [
+        "6883068002",
+        "7011263002"
       ],
       "broken": false
     },
     "Snowflake": {
       "seen_ids": [
+        "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b",
+        "https://jobs.ashbyhq.com/snowflake/3ac79875-b7bb-4078-b9c4-3bd5636e5d9c"
       ],
       "broken": false
     },
     "Capital One": {
       "seen_ids": [
+        "98043168960",
+        "98043168880"
       ],
       "broken": false
     },
@@ -29,17 +35,29 @@
     },
     "Amazon": {
       "seen_ids": [
+        "10412530",
+        "3179209",
+        "3136266"
       ],
       "broken": false
     },
     "Microsoft": {
       "seen_ids": [
+        "1970393556866705",
+        "1970393556859421",
+        "1970393556875247",
+        "1970393556917519",
+        "1970393556641091",
+        "1970393556917520",
+        "1970393556866710",
+        "1970393556866901",
+        "1970393556939161",
+        "1970393556937623"
       ],
       "broken": false
     },
     "Google": {
-      "seen_ids": [
-      ],
+      "seen_ids": [],
       "broken": false
     },
     "IBM": {
@@ -51,13 +69,11 @@
       "broken": false
     },
     "Wells Fargo": {
-      "seen_ids": [
-      ],
+      "seen_ids": [],
       "broken": false
     },
     "Morgan Stanley": {
-      "seen_ids": [
-      ],
+      "seen_ids": [],
       "broken": false
     },
     "Mastercard": {
@@ -73,8 +89,7 @@
       "broken": false
     },
     "Citi": {
-      "seen_ids": [
-      ],
+      "seen_ids": [],
       "broken": false
     },
     "Fidelity": {
@@ -83,6 +98,7 @@
     },
     "Stripe": {
       "seen_ids": [
+        "8031833"
       ],
       "broken": false
     },
@@ -111,12 +127,12 @@
       "broken": false
     },
     "JPMorganChase": {
-      "seen_ids": [
-      ],
+      "seen_ids": [],
       "broken": false
     },
     "PNC": {
       "seen_ids": [
+        "R212891"
       ],
       "broken": false
     },
