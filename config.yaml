@@ -15,7 +15,8 @@
 #   radancy     -> params: { url: "...", base_url: "https://companycareers.com" }
 #                  (url is the full captured "?ActiveFacetID=Internship&..." request --
 #                  a Radancy-platform career search filtered to internships.)
-#   generic_json-> params: { url: "...", jobs_path: "jobs", id_field: "id",
+#   generic_json-> params: { url: "...", method: "GET" (default) or "POST", body: {...} (for POST),
+#                             jobs_path: "jobs", id_field: "id",
 #                             title_field: "title", url_field: "url",
 #                             location_field: "location" (optional) }
 #
@@ -140,13 +141,45 @@
   us_only: true
 
 - name: "PNC"
-  adapter: workday
+  adapter: generic_json
   params:
-    tenant: "pnc"
-    site: "External"
-    wd: "wd5"           # [confirmed] real URL: pnc.wd5.myworkdayjobs.com/External
-    search_text: ""      # blank on purpose -- same lesson as DraftKings/PayPal
-    max_pages: 15
+    # [confirmed via DevTools] PNC's public search runs through Phenom People
+    # (careers.pnc.com/widgets), a layer in front of their real Workday
+    # backend -- similar to how Capital One's Radancy sits in front of theirs.
+    # POST body captured from their actual "intern" search; returns clean JSON,
+    # no HTML-fragment parsing needed. applyUrl already points to the real
+    # Workday posting.
+    url: "https://careers.pnc.com/widgets"
+    method: "POST"
+    body:
+      lang: "en_global"
+      deviceType: "desktop"
+      country: "global"
+      pageName: "search-results"
+      all_fields: ["country", "city", "state", "category", "type", "remote", "phLocSlider"]
+      clearAll: false
+      counts: true
+      ddoKey: "eagerLoadRefineSearch"
+      from: 0
+      global: true
+      irs: false
+      isSliderEnable: true
+      jdsource: "facets"
+      jobs: true
+      keywords: ""
+      location: ""
+      pageId: "page13-ds"
+      s: "1"
+      selected_fields: {}
+      siteType: "external"
+      size: 50
+      sortBy: ""
+      subsearch: "intern"
+    jobs_path: "eagerLoadRefineSearch.data.jobs"
+    id_field: "reqId"
+    title_field: "title"
+    url_field: "applyUrl"
+    location_field: "state"
   keywords: ["intern"]
   exclude: []
   us_only: true
