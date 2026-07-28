@@ -127,6 +127,18 @@
   exclude: []
   us_only: true
 
+- name: "PayPal"
+  adapter: workday
+  params:
+    tenant: "paypal"
+    site: "jobs"
+    wd: "wd1"
+    search_text: ""    # blank on purpose -- same fix as DraftKings, server-side "intern" search proved unreliable
+    max_pages: 20        # ~66 was suspiciously low for a company PayPal's size; give it room
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
 - name: "Google"
   adapter: google_html
   params:
