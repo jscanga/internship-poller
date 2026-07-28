@@ -1,6 +1,6 @@
 """
 Each adapter takes a `params` dict from config.yaml and returns a list of
-normalized job dicts: {"id": str, "title": str, "url": str}
+normalized job dicts: {"id": str, "title": str, "url": str, "location": str}
 
 Keep these functions defensive -- ATS backends change shape occasionally,
 and a KeyError here should never crash the whole run for every other
@@ -44,23 +44,6 @@ def fetch_greenhouse(params):
     return jobs
 
 
-def fetch_lever(params):
-    slug = params["slug"]
-    url = f"https://api.lever.co/v0/postings/{slug}?mode=json"
-    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
-    r.raise_for_status()
-    data = _parse_json(r)
-    jobs = []
-    for j in data:
-        jobs.append({
-            "id": str(j.get("id")),
-            "title": j.get("text", ""),
-            "url": j.get("hostedUrl", ""),
-            "location": (j.get("categories") or {}).get("location", ""),
-        })
-    return jobs
-
-
 def fetch_workday(params):
     """
     Workday exposes two different public hosting patterns depending on how the
@@ -69,12 +52,19 @@ def fetch_workday(params):
       host_style "site":            {wd}.myworkdaysite.com/recruiting/{tenant}/{site}
     Both hit the same CXS API path, just under a different base. Check the real
     careers URL to know which one a company uses.
+
+    IMPORTANT: Workday's searchText param has proven unreliable across several
+    companies (it either doesn't filter server-side at all, or filters on
+    something other than title). Prefer search_text: "" and let our own
+    client-side keyword match do the work, unless the company's total catalog
+    is too large to paginate through (in which case coverage will be partial
+    regardless -- see the [warn] log line).
     """
     tenant = params["tenant"]
     site = params["site"]
     wd = params.get("wd", "wd1")  # e.g. "wd1", "wd5", "wd12" -- varies per company, check DevTools
     host_style = params.get("host_style", "jobs")
-    search_text = params.get("search_text", "intern")  # server-side search avoids the 20-result page cap
+    search_text = params.get("search_text", "intern")
 
     if host_style == "site":
         api_base = f"https://{wd}.myworkdaysite.com"
@@ -187,7 +177,6 @@ def fetch_google(params):
     r.raise_for_status()
     html = r.text
 
-    # matches: "123456789","Job Title Here","https://www.google.com/about/careers/applications/signin?jobId=...."
     pattern = re.compile(
         r'"(\d{10,})","([^"]+)","(https://www\.google\.com/about/careers/applications/signin\?jobId[^"]+)"'
     )
@@ -244,94 +233,11 @@ def fetch_radancy(params):
     return jobs
 
 
-def fetch_smartrecruiters(params):
-    """
-    SmartRecruiters has a documented public Posting API that needs no auth:
-      api.smartrecruiters.com/v1/companies/{companyId}/postings
-    Note: it's tier-dependent -- companies on lower SmartRecruiters plans don't
-    have the public feed enabled, in which case this returns nothing.
-
-    query defaults to blank (pull the whole board, filter locally). Their
-    server-side q= search proved unreliable elsewhere, so we don't lean on it.
-    """
-    company = params["company"]
-    query = params.get("query", "")
-    url = f"https://api.smartrecruiters.com/v1/companies/{company}/postings"
-    all_jobs = []
-    offset = 0
-    limit = 100
-    total_found = None
-    for _ in range(10):
-        req_params = {"limit": limit, "offset": offset}
-        if query:
-            req_params["q"] = query
-        r = requests.get(url, headers=HEADERS, params=req_params, timeout=TIMEOUT)
-        r.raise_for_status()
-        data = _parse_json(r)
-        total_found = data.get("totalFound", total_found)
-        content = data.get("content", [])
-        for j in content:
-            loc = j.get("location", {}) or {}
-            loc_parts = [loc.get("city", ""), loc.get("region", ""), loc.get("country", "")]
-            all_jobs.append({
-                "id": str(j.get("id", "")),
-                "title": j.get("name", ""),
-                "url": f"https://jobs.smartrecruiters.com/{company}/{j.get('id', '')}",
-                "location": ", ".join(p for p in loc_parts if p),
-            })
-        if len(content) < limit:
-            break
-        offset += limit
-
-    print(f"[debug] smartrecruiters {company}: totalFound={total_found}, fetched={len(all_jobs)}")
-    return all_jobs
-
-
-def fetch_oracle_cloud(params):
-    """
-    Oracle Fusion Cloud HCM "Candidate Experience" sites (JPMorgan among them).
-    The CE UI calls recruitingCEJobRequisitions unauthenticated, so we can too.
-
-    UNVERIFIED: I could not test this endpoint. The finder syntax is fiddly and
-    varies by Oracle version. If it errors or returns nothing, capture the real
-    request from DevTools on their careers site and we'll match it exactly.
-    """
-    host = params["host"]              # e.g. "jpmc.fa.oraclecloud.com"
-    site_number = params["site_number"]  # e.g. "CX_1001"
-    keyword = params.get("keyword", "intern")
-    url = f"https://{host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
-    finder = f"findReqs;siteNumber={site_number},keyword={keyword},limit=100"
-    r = requests.get(
-        url,
-        headers={**HEADERS, "Accept": "application/json"},
-        params={"onlyData": "true", "expand": "requisitionList", "finder": finder},
-        timeout=TIMEOUT,
-    )
-    r.raise_for_status()
-    data = _parse_json(r)
-
-    jobs = []
-    for item in data.get("items", []):
-        for req in item.get("requisitionList", []):
-            req_id = str(req.get("Id", ""))
-            locations = req.get("PrimaryLocation", "") or ""
-            jobs.append({
-                "id": req_id,
-                "title": req.get("Title", ""),
-                "url": f"https://{host}/hcmUI/CandidateExperience/en/sites/{site_number}/job/{req_id}",
-                "location": locations,
-            })
-    return jobs
-
-
 ADAPTERS = {
     "greenhouse": fetch_greenhouse,
-    "lever": fetch_lever,
     "workday": fetch_workday,
     "ashby": fetch_ashby,
     "generic_json": fetch_generic_json,
     "google_html": fetch_google,
     "radancy": fetch_radancy,
-    "smartrecruiters": fetch_smartrecruiters,
-    "oracle_cloud": fetch_oracle_cloud,
 }
