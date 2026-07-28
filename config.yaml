@@ -220,6 +220,22 @@
   exclude: []
   us_only: true
 
+- name: "Visa"
+  adapter: workday
+  params:
+    # [confirmed via DevTools] Visa runs a SEPARATE dedicated early-careers
+    # Workday site, not their general career site -- that's why the earlier
+    # SmartRecruiters guess (wrong platform entirely) only found 2 results.
+    # search_text blank on purpose, same lesson as DraftKings/PayPal/PNC:
+    # this site is small enough to pull in full and let our own title filter work.
+    tenant: "visa"
+    site: "Visa_Early_Careers"
+    wd: "wd5"
+    search_text: ""
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
 - name: "Google"
   adapter: google_html
   params:
