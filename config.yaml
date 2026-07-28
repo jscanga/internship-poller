@@ -139,6 +139,44 @@
   exclude: []
   us_only: true
 
+- name: "PNC"
+  adapter: workday
+  params:
+    tenant: "pnc"
+    site: "External"
+    wd: "wd5"           # [confirmed] real URL: pnc.wd5.myworkdayjobs.com/External
+    search_text: ""      # blank on purpose -- same lesson as DraftKings/PayPal
+    max_pages: 15
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "BNY"
+  adapter: oracle_cloud
+  params:
+    # [unverified] BNY is on Oracle Cloud HCM like JPMorgan. Two possible site
+    # identifiers turned up in search -- "BNY-Careers" and "CX_1001" -- using
+    # the more BNY-specific one as the first guess. If this returns nothing,
+    # swap to "CX_1001", or better, capture the real DevTools request.
+    host: "eofe.fa.us2.oraclecloud.com"
+    site_number: "BNY-Careers"
+    keyword: "intern"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "Dell"
+  adapter: radancy
+  params:
+    # [unverified] Dell is on Radancy (jobs.dell.com), NOT Workday. This is a
+    # plain keyword search rather than a facet filter; if it misses things,
+    # capture the real filtered request from DevTools like we did for Capital One.
+    url: "https://jobs.dell.com/search-jobs/results?Keywords=intern&CurrentPage=1&RecordsPerPage=50&SearchType=1&SortCriteria=0&SortDirection=0"
+    base_url: "https://jobs.dell.com"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
 - name: "Google"
   adapter: google_html
   params:
