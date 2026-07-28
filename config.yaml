@@ -154,13 +154,16 @@
 - name: "BNY"
   adapter: oracle_cloud
   params:
-    # [unverified] BNY is on Oracle Cloud HCM like JPMorgan. Two possible site
-    # identifiers turned up in search -- "BNY-Careers" and "CX_1001" -- using
-    # the more BNY-specific one as the first guess. If this returns nothing,
-    # swap to "CX_1001", or better, capture the real DevTools request.
+    # [confirmed working] workLocationCountryCode is a real, documented finder
+    # param (unlike the opaque per-company facet ID we saw in the URL) -- using
+    # it as a genuine server-side chokepoint instead of paging through the
+    # whole 1000+ catalog. Combined with our client-side title filter and
+    # us_only, this should be both accurate and much lighter-weight.
     host: "eofe.fa.us2.oraclecloud.com"
     site_number: "BNY-Careers"
     keyword: "intern"
+    country_code: "US"
+    max_pages: 5
   keywords: ["intern"]
   exclude: []
   us_only: true
