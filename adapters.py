@@ -239,20 +239,22 @@ def fetch_oracle_cloud(params):
     them). The CE UI calls recruitingCEJobRequisitions unauthenticated, so we
     can too.
 
-    Two things learned the hard way from a real captured request:
+    Learned the hard way from real captured requests:
       - site_number is opaque per-company (e.g. "CX_3001") and NOT guessable
-        from the URL slug shown in the browser (BNY's URL says "BNY-Careers"
-        but the real site number is "CX_3001") -- always verify via DevTools.
+        from the URL slug shown in the browser -- always verify via DevTools.
       - location filtering uses locationId=<opaque per-company facet ID>, not
-        the documented-sounding workLocationCountryCode (that param exists in
-        Oracle's docs but didn't actually filter anything for BNY's tenant).
-        The keyword value also gets wrapped in literal quotes in real captured
-        requests (keyword="intern"), which we replicate here.
+        the documented-sounding workLocationCountryCode.
+      - keyword gets wrapped in literal quotes in real requests (keyword="intern").
+      - posting_days (selectedPostingDatesFacet) is a genuine, powerful
+        chokepoint -- filtering to "posted in the last N days" is both a real
+        server-side filter AND exactly what we want anyway, since we only
+        care about postings new enough to still be worth applying to.
     """
     host = params["host"]                # e.g. "jpmc.fa.oraclecloud.com"
     site_number = params["site_number"]  # e.g. "CX_3001" -- get this from DevTools, not the URL slug
     keyword = params.get("keyword", "intern")
-    location_id = params.get("location_id")  # opaque per-company facet ID, e.g. "300000000378743"
+    location_id = params.get("location_id")      # opaque per-company facet ID, e.g. "300000000378743"
+    posting_days = params.get("posting_days")     # e.g. 7 -- "posted within last N days"
     max_pages = params.get("max_pages", 5)
     page_size = 100
 
@@ -261,15 +263,25 @@ def fetch_oracle_cloud(params):
     offset = 0
     hit_cap = False
     for i in range(max_pages):
-        finder_parts = [
-            f"siteNumber={site_number}",
-            f'keyword="{keyword}"',
-            "sortBy=POSTING_DATES_DESC",
-            f"limit={page_size}",
-            f"offset={offset}",
-        ]
+        finder_parts = [f"siteNumber={site_number}"]
+        if posting_days:
+            # mirror the real captured request structure when using this facet
+            finder_parts.append(
+                "facetsList=LOCATIONS;WORK_LOCATIONS;WORKPLACE_TYPES;TITLES;"
+                "CATEGORIES;ORGANIZATIONS;POSTING_DATES;FLEX_FIELDS"
+            )
+        finder_parts.append(f'keyword="{keyword}"')
+        if posting_days:
+            finder_parts.append("lastSelectedFacet=POSTING_DATES")
         if location_id:
-            finder_parts.insert(2, f"locationId={location_id}")
+            finder_parts.append(f"locationId={location_id}")
+        if posting_days:
+            finder_parts.append(f"selectedPostingDatesFacet={posting_days}")
+            finder_parts.append("sortBy=RELEVANCY")
+        else:
+            finder_parts.append("sortBy=POSTING_DATES_DESC")
+        finder_parts.append(f"limit={page_size}")
+        finder_parts.append(f"offset={offset}")
         finder = "findReqs;" + ",".join(finder_parts)
 
         r = requests.get(
