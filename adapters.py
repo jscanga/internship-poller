@@ -239,17 +239,20 @@ def fetch_oracle_cloud(params):
     them). The CE UI calls recruitingCEJobRequisitions unauthenticated, so we
     can too.
 
-    keyword= is unreliable the same way Workday's searchText is -- it may not
-    actually narrow results server-side. workLocationCountryCode IS a
-    documented, real finder parameter though (unlike company-specific opaque
-    facet IDs), so we use that as a genuine chokepoint when country_code is
-    set. sortBy=POSTING_DATES_DESC surfaces newest postings first, which pairs
-    well with our own new-vs-seen diffing even without a real date filter.
+    Two things learned the hard way from a real captured request:
+      - site_number is opaque per-company (e.g. "CX_3001") and NOT guessable
+        from the URL slug shown in the browser (BNY's URL says "BNY-Careers"
+        but the real site number is "CX_3001") -- always verify via DevTools.
+      - location filtering uses locationId=<opaque per-company facet ID>, not
+        the documented-sounding workLocationCountryCode (that param exists in
+        Oracle's docs but didn't actually filter anything for BNY's tenant).
+        The keyword value also gets wrapped in literal quotes in real captured
+        requests (keyword="intern"), which we replicate here.
     """
     host = params["host"]                # e.g. "jpmc.fa.oraclecloud.com"
-    site_number = params["site_number"]  # e.g. "CX_1001" or "BNY-Careers"
+    site_number = params["site_number"]  # e.g. "CX_3001" -- get this from DevTools, not the URL slug
     keyword = params.get("keyword", "intern")
-    country_code = params.get("country_code")  # e.g. "US" -- real server-side filter
+    location_id = params.get("location_id")  # opaque per-company facet ID, e.g. "300000000378743"
     max_pages = params.get("max_pages", 5)
     page_size = 100
 
@@ -260,13 +263,13 @@ def fetch_oracle_cloud(params):
     for i in range(max_pages):
         finder_parts = [
             f"siteNumber={site_number}",
-            f"keyword={keyword}",
+            f'keyword="{keyword}"',
             "sortBy=POSTING_DATES_DESC",
             f"limit={page_size}",
             f"offset={offset}",
         ]
-        if country_code:
-            finder_parts.insert(2, f"workLocationCountryCode={country_code}")
+        if location_id:
+            finder_parts.insert(2, f"locationId={location_id}")
         finder = "findReqs;" + ",".join(finder_parts)
 
         r = requests.get(
