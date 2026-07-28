@@ -10,34 +10,34 @@
     },
     "Databricks": {
       "seen_ids": [
-        "8632282002",
-        "6883068002",
-        "5646866002",
         "8012809002",
-        "5048461002",
-        "8012818002",
         "6544386002",
+        "6883068002",
+        "8012818002",
         "8012658002",
+        "5646866002",
+        "6544383002",
         "7011263002",
-        "6544383002"
+        "5048461002",
+        "8632282002"
       ],
-      "broken": true
+      "broken": false
     },
     "Snowflake": {
       "seen_ids": [
-        "https://jobs.ashbyhq.com/snowflake/41e65c6c-a01e-4f40-af14-ae75d3b95e27",
-        "https://jobs.ashbyhq.com/snowflake/3ac79875-b7bb-4078-b9c4-3bd5636e5d9c",
-        "https://jobs.ashbyhq.com/snowflake/b696164c-4865-43f4-940d-b5353755748f",
-        "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b",
+        "https://jobs.ashbyhq.com/snowflake/a4753822-7581-4cf3-8fcc-856f54d684b0",
         "https://jobs.ashbyhq.com/snowflake/54c27993-5827-4a03-80c8-cc5f02b960f9",
-        "https://jobs.ashbyhq.com/snowflake/a4753822-7581-4cf3-8fcc-856f54d684b0"
+        "https://jobs.ashbyhq.com/snowflake/b696164c-4865-43f4-940d-b5353755748f",
+        "https://jobs.ashbyhq.com/snowflake/3ac79875-b7bb-4078-b9c4-3bd5636e5d9c",
+        "https://jobs.ashbyhq.com/snowflake/41e65c6c-a01e-4f40-af14-ae75d3b95e27",
+        "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b"
       ],
       "broken": false
     },
     "Capital One": {
       "seen_ids": [
-        "98043168960",
-        "98043168880"
+        "98043168880",
+        "98043168960"
       ],
       "broken": false
     },
@@ -48,34 +48,34 @@
     "Amazon": {
       "seen_ids": [
         "3136266",
-        "3179209",
-        "10412530"
+        "10412530",
+        "3179209"
       ],
       "broken": false
     },
     "Microsoft": {
       "seen_ids": [
-        "1970393556866901",
-        "1970393556641091",
+        "1970393556917520",
         "1970393556867858",
-        "1970393556866705",
-        "1970393556859421",
-        "1970393556875247",
-        "1970393556939161",
         "1970393556917519",
         "1970393556869379",
+        "1970393556937623",
+        "1970393556866705",
+        "1970393556875247",
+        "1970393556641091",
+        "1970393556859421",
+        "1970393556866901",
         "1970393556866710",
         "1970393556911730",
-        "1970393556937623",
-        "1970393556917520"
+        "1970393556939161"
       ],
       "broken": false
     },
     "Google": {
       "seen_ids": [
+        "76982475250639558",
         "95423484271698630",
         "95141459539174086",
-        "76982475250639558",
         "85564713261245126"
       ],
       "broken": false
@@ -90,25 +90,29 @@
     },
     "Wells Fargo": {
       "seen_ids": [
-        "/job/CHARLOTTE-NC/XMLNAME-2027-COO-Chief-Administrative-Office-Summer-Internship---Early-Careers_R-556474",
-        "/job/CHARLOTTE-NC/XMLNAME-2027-Corporate-Risk-Development-Program-Summer-Internship--Core-Risk----Early-Careers_R-556123",
-        "/job/CHARLOTTE-NC/XMLNAME-2027-Consumer-Banking-and-Lending-Summer-Internship---Early-Careers_R-556017",
-        "/job/CHARLOTTE-NC/XMLNAME-2027-Human-Resources-Internship---Early-Careers_R-555463-1",
-        "/job/CHARLOTTE-NC/XMLNAME-2027-COO-Global-Operations-Summer-Internship---Early-Careers_R-556448",
-        "/job/LOS-ANGELES-CA/XMLNAME-2027-Summer-Internship--Early-Careers---Commercial-Banking--CA-CO-_R-555721",
-        "/job/CHARLOTTE-NC/XMLNAME-2027-Audit-Summer-Internship---Early-Careers_R-556216",
-        "/job/CHARLOTTE-NC/XMLNAME-2027-Global-Payments---Liquidity-Internship---Early-Careers_R-555489",
-        "/job/NEW-YORK-NY/XMLNAME-2027-Summer-Internship--Early-Careers---Commercial-Banking--NY-_R-555736",
-        "/job/XMLNAME-2027-COO-Business-Risk-Control-and-Regulatory-Oversight-Summer-Internship---Early-Careers_R-556488",
-        "/job/CHARLOTTE-NC/XMLNAME-2027-Wealth---Investment-Management-Summer-Internship---Early-Careers_R-556103",
         "/job/CHARLOTTE-NC/XMLNAME-2027-Summer-Internship--Early-Careers---Commercial-Banking_R-555720",
-        "/job/CHARLOTTE-NC/XMLNAME-2027-Finance-Summer-Internship---Early-Careers_R-555860"
+        "/job/XMLNAME-2027-COO-Business-Risk-Control-and-Regulatory-Oversight-Summer-Internship---Early-Careers_R-556488",
+        "/job/CHARLOTTE-NC/XMLNAME-2027-COO-Global-Operations-Summer-Internship---Early-Careers_R-556448",
+        "/job/CHARLOTTE-NC/XMLNAME-2027-Audit-Summer-Internship---Early-Careers_R-556216",
+        "/job/CHARLOTTE-NC/XMLNAME-2027-Consumer-Banking-and-Lending-Summer-Internship---Early-Careers_R-556017",
+        "/job/NEW-YORK-NY/XMLNAME-2027-Summer-Internship--Early-Careers---Commercial-Banking--NY-_R-555736",
+        "/job/CHARLOTTE-NC/XMLNAME-2027-COO-Chief-Administrative-Office-Summer-Internship---Early-Careers_R-556474",
+        "/job/CHARLOTTE-NC/XMLNAME-2027-Human-Resources-Internship---Early-Careers_R-555463-1",
+        "/job/CHARLOTTE-NC/XMLNAME-2027-Finance-Summer-Internship---Early-Careers_R-555860",
+        "/job/CHARLOTTE-NC/XMLNAME-2027-Global-Payments---Liquidity-Internship---Early-Careers_R-555489",
+        "/job/LOS-ANGELES-CA/XMLNAME-2027-Summer-Internship--Early-Careers---Commercial-Banking--CA-CO-_R-555721",
+        "/job/CHARLOTTE-NC/XMLNAME-2027-Corporate-Risk-Development-Program-Summer-Internship--Core-Risk----Early-Careers_R-556123",
+        "/job/CHARLOTTE-NC/XMLNAME-2027-Wealth---Investment-Management-Summer-Internship---Early-Careers_R-556103"
       ],
       "broken": false
     },
     "Morgan Stanley": {
       "seen_ids": [
-        "/job/Orlando-Florida-United-States-of-America/Intern_JR040900"
+        "/job/New-York-New-York-United-States-of-America/Real-Assets-Sustainability---Investment-Management---Off-Cycle-Intern_JR037278-1",
+        "/job/Pasadena-California-United-States-of-America/Intern---Bilingual-Eglish-Mandarin_JR037650",
+        "/job/Orlando-Florida-United-States-of-America/Intern_JR040900",
+        "/job/Pasadena-California-United-States-of-America/Intern---Bilingual-English-Spanish_JR037647",
+        "/job/Pasadena-California-United-States-of-America/Intern_JR037649"
       ],
       "broken": false
     },
@@ -126,8 +130,8 @@
     },
     "Citi": {
       "seen_ids": [
-        "/job/KYIV-Ukraine/Ukraine-Internship-Program---2026_25929484",
-        "/job/Seef--Bahrain/Application-Development-Intern_26930673"
+        "/job/Seef--Bahrain/Application-Development-Intern_26930673",
+        "/job/KYIV-Ukraine/Ukraine-Internship-Program---2026_25929484"
       ],
       "broken": false
     },
@@ -151,7 +155,7 @@
     },
     "Plaid": {
       "seen_ids": [],
-      "broken": true
+      "broken": false
     },
     "Visa": {
       "seen_ids": [],
