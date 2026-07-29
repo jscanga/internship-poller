@@ -321,7 +321,10 @@
     site_number: "CX_1001"
     keyword: "intern"
     location_id: "300000000289738"
-    posting_days: 14   # real chokepoint since keyword= isn't reliable filtering here either
+    posting_days: 3   # real chokepoint since keyword= isn't reliable filtering here, and JPMorgan
+                        # has no internship-specific category filter to use instead. A short window
+                        # is fine anyway -- we only care about postings new enough to still apply to,
+                        # and this cron runs every 10 minutes so 3 days is a generous safety margin.
     max_pages: 5
   keywords: ["intern"]
   exclude: []
