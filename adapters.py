@@ -217,9 +217,11 @@ def fetch_phenom_csrf(params):
         "X-CSRF-Token": csrf_token,
     }
     r = _request_with_retry(session.post, url, headers=post_headers, json=body, timeout=TIMEOUT)
-    print(f"[debug] phenom_csrf: POST status={r.status_code}, body snippet={r.text[:300]!r}")
     r.raise_for_status()
     data = _parse_json(r)
+    ddo_key = body.get("ddoKey", "")
+    inner = data.get(ddo_key, {}) if ddo_key else {}
+    print(f"[debug] phenom_csrf: hits={inner.get('hits')}, totalHits={inner.get('totalHits')}")
     return _extract_generic_jobs(data, params)
 
 
