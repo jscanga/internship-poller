@@ -266,6 +266,7 @@ def fetch_oracle_cloud(params):
     jobs = []
     offset = 0
     hit_cap = False
+    total_reported = None
     for i in range(max_pages):
         finder_parts = [f"siteNumber={site_number}"]
         if posting_days:
@@ -302,6 +303,10 @@ def fetch_oracle_cloud(params):
         r.raise_for_status()
         data = _parse_json(r)
 
+        for item in data.get("items", []):
+            if "TotalJobsCount" in item:
+                total_reported = item["TotalJobsCount"]
+
         page_jobs = []
         for item in data.get("items", []):
             for req in item.get("requisitionList", []):
@@ -319,11 +324,16 @@ def fetch_oracle_cloud(params):
         if i == max_pages - 1:
             hit_cap = True
 
-    print(f"[debug] oracle_cloud {host}/{site_number}: fetched={len(jobs)}")
+    print(f"[debug] oracle_cloud {host}/{site_number}: reported total={total_reported}, fetched={len(jobs)}")
     if hit_cap:
         print(
             f"[warn] oracle_cloud {host}/{site_number}: hit the {max_pages}-page cap at "
             f"{len(jobs)} postings -- there may be more."
+        )
+    elif total_reported and total_reported > len(jobs):
+        print(
+            f"[warn] oracle_cloud {host}/{site_number}: total ({total_reported}) is larger than "
+            f"what we fetched ({len(jobs)}) -- some postings may be missed."
         )
     return jobs
 
