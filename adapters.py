@@ -190,16 +190,21 @@ def fetch_phenom_csrf(params):
     r0 = session.get(referer_url, timeout=TIMEOUT)
     r0.raise_for_status()
 
-    csrf_token = None
     play_session = session.cookies.get("PLAY_SESSION")
+    print(f"[debug] phenom_csrf {referer_url}: got PLAY_SESSION cookie = {bool(play_session)}")
+
+    csrf_token = None
     if play_session:
         try:
             payload_b64 = play_session.split(".")[1]
             padded = payload_b64 + "=" * (-len(payload_b64) % 4)
             payload = json_lib.loads(base64.urlsafe_b64decode(padded))
             csrf_token = payload.get("data", {}).get("csrfToken")
-        except Exception:
+        except Exception as e:
+            print(f"[debug] phenom_csrf: failed to decode PLAY_SESSION payload: {e}")
             csrf_token = None
+
+    print(f"[debug] phenom_csrf: extracted csrf_token = {csrf_token[:8] + '...' if csrf_token else None}")
 
     if not csrf_token:
         raise RuntimeError("could not extract csrfToken from PLAY_SESSION cookie -- session/auth flow may have changed")
@@ -212,6 +217,7 @@ def fetch_phenom_csrf(params):
         "X-CSRF-Token": csrf_token,
     }
     r = _request_with_retry(session.post, url, headers=post_headers, json=body, timeout=TIMEOUT)
+    print(f"[debug] phenom_csrf: POST status={r.status_code}, body snippet={r.text[:300]!r}")
     r.raise_for_status()
     data = _parse_json(r)
     return _extract_generic_jobs(data, params)
