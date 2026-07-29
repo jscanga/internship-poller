@@ -114,19 +114,6 @@
   exclude: []
   us_only: true
 
-- name: "Microsoft"
-  adapter: generic_json
-  params:
-    url: "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&location=&start=0&num=20"
-    jobs_path: "data.positions"
-    id_field: "id"
-    title_field: "name"
-    url_field: "id"
-    url_prefix: "https://apply.careers.microsoft.com/careers?pid="
-    location_field: "location"
-  keywords: ["intern", "explore"]
-  exclude: []
-  us_only: true
 
 - name: "PayPal"
   adapter: workday
@@ -265,14 +252,15 @@
   us_only: true
 
 - name: "Mastercard"
-  adapter: generic_json
+  adapter: phenom_csrf
   params:
-    # [confirmed via DevTools] Same Phenom People platform as PNC, same schema
-    # -- assuming title/applyUrl field names carry over since everything else
-    # matched exactly (ml_skills, descriptionTeaser, reqId, multi_location,
-    # etc. all identical structure to PNC's real response).
+    # [confirmed via DevTools] Mastercard's Phenom deployment enforces
+    # session-based CSRF (Play Framework's PLAY_SESSION cookie), unlike PNC's.
+    # Without this, requests are silently rejected (0 jobs, no error) --
+    # which is why the plain generic_json version returned 0 even with no
+    # keyword filter at all.
+    referer_url: "https://careers.mastercard.com/us/en/search-results"
     url: "https://careers.mastercard.com/widgets"
-    method: "POST"
     body:
       lang: "en_us"
       deviceType: "desktop"
@@ -296,6 +284,7 @@
       siteType: "external"
       size: 50
       sortBy: ""
+      subsearch: "intern"
     jobs_path: "eagerLoadRefineSearch.data.jobs"
     id_field: "reqId"
     title_field: "title"
