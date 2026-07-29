@@ -321,10 +321,13 @@
     site_number: "CX_1001"
     keyword: "intern"
     location_id: "300000000289738"
-    posting_days: 3   # real chokepoint since keyword= isn't reliable filtering here, and JPMorgan
-                        # has no internship-specific category filter to use instead. A short window
-                        # is fine anyway -- we only care about postings new enough to still apply to,
-                        # and this cron runs every 10 minutes so 3 days is a generous safety margin.
+    # posting_days tried and confirmed NOT respected by this specific Oracle
+    # deployment -- total barely moved (2532 -> 2531) even after tightening
+    # from 14 to 3 days, unlike BNY where the same param worked cleanly. Some
+    # Oracle Cloud tenants apparently don't honor this facet. Falling back to
+    # the adapter's default sortBy=POSTING_DATES_DESC (newest-first) instead --
+    # doesn't narrow the true total, but guarantees the 500 we fetch are their
+    # most recent postings company-wide, which is what actually matters here.
     max_pages: 5
   keywords: ["intern"]
   exclude: []
