@@ -8,8 +8,25 @@ company. main.py wraps each company's fetch in try/except already, but
 adapters should still fail loudly with a clear message when they do fail.
 """
 import re
+import time
 
 import requests
+
+def _request_with_retry(method, url, **kwargs):
+    """
+    Wraps requests.get/post with one retry on 429, waiting for the
+    Retry-After header if present, else a flat backoff. A single transient
+    rate limit shouldn't cost us an entire company for that cycle.
+    """
+    r = method(url, **kwargs)
+    if r.status_code == 429:
+        wait = int(r.headers.get("Retry-After", 30))
+        wait = min(wait, 60)  # don't let a run hang forever on one company
+        print(f"[warn] 429 rate limited on {url}, waiting {wait}s and retrying once")
+        time.sleep(wait)
+        r = method(url, **kwargs)
+    return r
+
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; intern-watch/1.0; personal job-alert bot)"
@@ -122,15 +139,7 @@ def _dig(data, dotted_path):
     return cur if isinstance(cur, list) else []
 
 
-def fetch_generic_json(params):
-    url = params["url"]
-    method = params.get("method", "GET").upper()
-    if method == "POST":
-        r = requests.post(url, headers=HEADERS, json=params.get("body", {}), timeout=TIMEOUT)
-    else:
-        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
-    r.raise_for_status()
-    data = _parse_json(r)
+def _extract_generic_jobs(data, params):
     raw_jobs = _dig(data, params["jobs_path"])
     prefix = params.get("url_prefix", "")
     jobs = []
@@ -145,6 +154,67 @@ def fetch_generic_json(params):
         if job_id:
             jobs.append({"id": job_id, "title": title, "url": full_url, "location": location})
     return jobs
+
+
+def fetch_generic_json(params):
+    url = params["url"]
+    method = params.get("method", "GET").upper()
+    if method == "POST":
+        r = _request_with_retry(requests.post, url, headers=HEADERS, json=params.get("body", {}), timeout=TIMEOUT)
+    else:
+        r = _request_with_retry(requests.get, url, headers=HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    data = _parse_json(r)
+    return _extract_generic_jobs(data, params)
+
+
+def fetch_phenom_csrf(params):
+    """
+    Some Phenom People deployments (Mastercard, unlike PNC) enforce
+    session-based CSRF protection: a PLAY_SESSION cookie (Play Framework's
+    session token, itself a JWT) must be established via a real GET to the
+    search page first, and its embedded csrfToken echoed back as an
+    X-CSRF-Token header on the POST to /widgets. Without this, the endpoint
+    silently returns an empty result instead of erroring -- which is why this
+    looked like a field-name problem at first when it was actually an auth one.
+    """
+    import base64
+    import json as json_lib
+
+    referer_url = params["referer_url"]
+    url = params["url"]
+    body = params.get("body", {})
+
+    session = requests.Session()
+    session.headers.update(HEADERS)
+    r0 = session.get(referer_url, timeout=TIMEOUT)
+    r0.raise_for_status()
+
+    csrf_token = None
+    play_session = session.cookies.get("PLAY_SESSION")
+    if play_session:
+        try:
+            payload_b64 = play_session.split(".")[1]
+            padded = payload_b64 + "=" * (-len(payload_b64) % 4)
+            payload = json_lib.loads(base64.urlsafe_b64decode(padded))
+            csrf_token = payload.get("data", {}).get("csrfToken")
+        except Exception:
+            csrf_token = None
+
+    if not csrf_token:
+        raise RuntimeError("could not extract csrfToken from PLAY_SESSION cookie -- session/auth flow may have changed")
+
+    post_headers = {
+        **HEADERS,
+        "Content-Type": "application/json",
+        "Origin": params.get("origin", referer_url.split("/us/")[0] if "/us/" in referer_url else referer_url),
+        "Referer": referer_url,
+        "X-CSRF-Token": csrf_token,
+    }
+    r = _request_with_retry(session.post, url, headers=post_headers, json=body, timeout=TIMEOUT)
+    r.raise_for_status()
+    data = _parse_json(r)
+    return _extract_generic_jobs(data, params)
 
 
 def fetch_ashby(params):
@@ -383,4 +453,5 @@ ADAPTERS = {
     "radancy": fetch_radancy,
     "oracle_cloud": fetch_oracle_cloud,
     "block_svelte": fetch_block_svelte,
+    "phenom_csrf": fetch_phenom_csrf,
 }
