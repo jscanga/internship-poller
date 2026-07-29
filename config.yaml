@@ -321,8 +321,8 @@
     site_number: "CX_1001"
     keyword: "intern"
     location_id: "300000000289738"
-    posting_days: 30
-    max_pages: 3
+    posting_days: 14   # real chokepoint since keyword= isn't reliable filtering here either
+    max_pages: 5
   keywords: ["intern"]
   exclude: []
   us_only: true
