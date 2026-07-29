@@ -296,7 +296,6 @@
       siteType: "external"
       size: 50
       sortBy: ""
-      subsearch: "intern"
     jobs_path: "eagerLoadRefineSearch.data.jobs"
     id_field: "reqId"
     title_field: "title"
