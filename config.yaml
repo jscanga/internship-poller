@@ -264,6 +264,69 @@
   exclude: []
   us_only: true
 
+- name: "Mastercard"
+  adapter: generic_json
+  params:
+    # [confirmed via DevTools] Same Phenom People platform as PNC, same schema
+    # -- assuming title/applyUrl field names carry over since everything else
+    # matched exactly (ml_skills, descriptionTeaser, reqId, multi_location,
+    # etc. all identical structure to PNC's real response).
+    url: "https://careers.mastercard.com/widgets"
+    method: "POST"
+    body:
+      lang: "en_us"
+      deviceType: "desktop"
+      country: "us"
+      pageName: "search-results"
+      all_fields: ["category", "country", "state", "city", "postalCode", "jobType", "phLocSlider"]
+      clearAll: false
+      counts: true
+      ddoKey: "eagerLoadRefineSearch"
+      from: 0
+      global: true
+      isSliderEnable: true
+      jdsource: "facets"
+      jobs: true
+      keywords: ""
+      location: ""
+      locationData: {sliderRadius: 300, aboveMaxRadius: false, LocationUnit: "kilometers"}
+      pageId: "page11"
+      s: "1"
+      selected_fields: {country: ["United States of America"]}
+      siteType: "external"
+      size: 50
+      sortBy: ""
+      subsearch: "intern"
+    jobs_path: "eagerLoadRefineSearch.data.jobs"
+    id_field: "reqId"
+    title_field: "title"
+    url_field: "applyUrl"
+    location_field: "state"
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
+- name: "JPMorganChase"
+  adapter: oracle_cloud
+  params:
+    # [confirmed via DevTools] locationId=300000000289738 assumed = US (the
+    # returned sample job had PrimaryLocationCountry: "US"). Deliberately NOT
+    # including the categoriesFacet seen in the captured request -- that job
+    # was a senior engineering role, not an intern posting, meaning
+    # keyword="intern" isn't real title-filtering here either (same lesson as
+    # everywhere else), and the category facet looked incidental (whatever was
+    # being browsed) rather than an "Internships" category. Our own title
+    # regex does the real filtering instead.
+    host: "jpmc.fa.oraclecloud.com"
+    site_number: "CX_1001"
+    keyword: "intern"
+    location_id: "300000000289738"
+    posting_days: 30
+    max_pages: 3
+  keywords: ["intern"]
+  exclude: []
+  us_only: true
+
 - name: "Google"
   adapter: google_html
   params:
