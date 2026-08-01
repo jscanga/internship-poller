@@ -6,7 +6,7 @@
     },
     "DraftKings": {
       "seen_ids": [],
-      "broken": false
+      "broken": true
     },
     "Databricks": {
       "seen_ids": [
@@ -24,8 +24,8 @@
     },
     "Capital One": {
       "seen_ids": [
-        "98043168880",
-        "98043168960"
+        "98043168960",
+        "98043168880"
       ],
       "broken": false
     },
@@ -35,9 +35,9 @@
     },
     "Amazon": {
       "seen_ids": [
-        "10412530",
+        "3179209",
         "3136266",
-        "3179209"
+        "10412530"
       ],
       "broken": false
     },
@@ -85,7 +85,7 @@
     },
     "PayPal": {
       "seen_ids": [],
-      "broken": false
+      "broken": true
     },
     "Dell": {
       "seen_ids": [],
@@ -119,7 +119,7 @@
     },
     "Visa": {
       "seen_ids": [],
-      "broken": false
+      "broken": true
     },
     "Block": {
       "seen_ids": [
