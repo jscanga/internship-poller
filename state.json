@@ -17,15 +17,15 @@
     },
     "Snowflake": {
       "seen_ids": [
-        "https://jobs.ashbyhq.com/snowflake/3ac79875-b7bb-4078-b9c4-3bd5636e5d9c",
-        "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b"
+        "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b",
+        "https://jobs.ashbyhq.com/snowflake/3ac79875-b7bb-4078-b9c4-3bd5636e5d9c"
       ],
       "broken": false
     },
     "Capital One": {
       "seen_ids": [
-        "98043168960",
-        "98043168880"
+        "98043168880",
+        "98043168960"
       ],
       "broken": false
     },
@@ -36,8 +36,8 @@
     "Amazon": {
       "seen_ids": [
         "3179209",
-        "10412530",
-        "3136266"
+        "3136266",
+        "10412530"
       ],
       "broken": false
     },
