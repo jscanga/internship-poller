@@ -17,8 +17,8 @@
     },
     "Snowflake": {
       "seen_ids": [
-        "https://jobs.ashbyhq.com/snowflake/3ac79875-b7bb-4078-b9c4-3bd5636e5d9c",
-        "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b"
+        "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b",
+        "https://jobs.ashbyhq.com/snowflake/3ac79875-b7bb-4078-b9c4-3bd5636e5d9c"
       ],
       "broken": false
     },
@@ -35,9 +35,9 @@
     },
     "Amazon": {
       "seen_ids": [
-        "10412530",
+        "3179209",
         "3136266",
-        "3179209"
+        "10412530"
       ],
       "broken": false
     },
@@ -81,7 +81,7 @@
     },
     "Mastercard": {
       "seen_ids": [],
-      "broken": false
+      "broken": true
     },
     "PayPal": {
       "seen_ids": [],
@@ -141,7 +141,7 @@
       "seen_ids": [
         "R212891"
       ],
-      "broken": false
+      "broken": true
     },
     "BNY": {
       "seen_ids": [],
