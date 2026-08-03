@@ -17,8 +17,8 @@
     },
     "Snowflake": {
       "seen_ids": [
-        "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b",
-        "https://jobs.ashbyhq.com/snowflake/3ac79875-b7bb-4078-b9c4-3bd5636e5d9c"
+        "https://jobs.ashbyhq.com/snowflake/3ac79875-b7bb-4078-b9c4-3bd5636e5d9c",
+        "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b"
       ],
       "broken": false
     },
@@ -35,8 +35,8 @@
     },
     "Amazon": {
       "seen_ids": [
-        "10412530",
         "3179209",
+        "10412530",
         "3136266"
       ],
       "broken": false
@@ -128,11 +128,32 @@
       "broken": false
     },
     "American Express": {
-      "seen_ids": [],
+      "seen_ids": [
+        "26011907",
+        "26011904",
+        "26011990",
+        "26011584",
+        "26011884",
+        "26011992",
+        "26011918",
+        "26011984",
+        "26011621",
+        "26011615",
+        "26011595",
+        "26011889",
+        "26011911",
+        "26011983"
+      ],
       "broken": false
     },
     "JPMorganChase": {
       "seen_ids": [
+        "210773978",
+        "210773869",
+        "210774061",
+        "210774038",
+        "210775223",
+        "210773759",
         "210761733"
       ],
       "broken": false
