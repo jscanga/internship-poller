@@ -10,8 +10,8 @@
     },
     "Databricks": {
       "seen_ids": [
-        "6883068002",
-        "7011263002"
+        "7011263002",
+        "6883068002"
       ],
       "broken": false
     },
@@ -24,12 +24,12 @@
     },
     "Capital One": {
       "seen_ids": [
-        "98043168880",
-        "99109660560",
-        "98697185120",
-        "99109660512",
         "97421687536",
+        "99109660560",
+        "98043168880",
+        "98697185120",
         "98043168960",
+        "99109660512",
         "98706584752"
       ],
       "broken": false
@@ -40,8 +40,8 @@
     },
     "Amazon": {
       "seen_ids": [
-        "10412530",
         "3179209",
+        "10412530",
         "3136266"
       ],
       "broken": false
@@ -86,8 +86,8 @@
     },
     "Mastercard": {
       "seen_ids": [
-        "R-287612",
-        "R-286204"
+        "R-286204",
+        "R-287612"
       ],
       "broken": false
     },
@@ -127,13 +127,13 @@
     },
     "Visa": {
       "seen_ids": [
-        "/job/AZ---Baku-Azerbaijan/Issuing-VAS-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086776W",
         "/job/MA---Casablanca-Morocco/VAS-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086777W",
-        "/job/KZ---Almaty-Kazakhstan/VCA-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086782W",
-        "/job/AZ---Baku-Azerbaijan/VCA-Intern---Graduates-Summer-2028-December-2027_REF086781W",
-        "/job/MA---Casablanca-Morocco/Marketing-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086798W",
+        "/job/UA---Kyiv-Ukraine/VCA-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086795W",
         "/job/KZ---Almaty-Kazakhstan/Client-Services-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086764W",
-        "/job/UA---Kyiv-Ukraine/VCA-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086795W"
+        "/job/KZ---Almaty-Kazakhstan/VCA-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086782W",
+        "/job/AZ---Baku-Azerbaijan/Issuing-VAS-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086776W",
+        "/job/MA---Casablanca-Morocco/Marketing-Intern---Students-Graduating-Summer-2028-or-December-2027_REF086798W",
+        "/job/AZ---Baku-Azerbaijan/VCA-Intern---Graduates-Summer-2028-December-2027_REF086781W"
       ],
       "broken": false
     },
@@ -145,80 +145,80 @@
     },
     "American Express": {
       "seen_ids": [
-        "26012181",
-        "26012154",
-        "26011984",
-        "26012326",
-        "26011621",
-        "26011904",
-        "26012148",
-        "26011911",
-        "26011584",
-        "26011907",
-        "26011889",
-        "26012175",
-        "26012302",
-        "26011566",
         "26011595",
-        "26011992",
-        "26011965",
-        "26011615",
         "26011990",
-        "26011983",
         "26012325",
-        "26011918",
-        "26012152",
-        "26012174",
-        "26012319",
-        "26012231",
-        "26012049",
+        "26012148",
+        "26011907",
+        "26011983",
+        "26012227",
+        "26011992",
+        "26011566",
         "26011884",
+        "26012181",
+        "26011965",
+        "26011621",
+        "26012175",
+        "26012174",
+        "26011584",
+        "26012049",
+        "26012319",
+        "26012326",
         "26011916",
+        "26011911",
+        "26011904",
+        "26012154",
+        "26012152",
         "26011994",
+        "26011984",
         "26012228",
+        "26011918",
+        "26011615",
+        "26011889",
+        "26012231",
         "26012047",
-        "26012227"
+        "26012302"
       ],
       "broken": false
     },
     "JPMorganChase": {
       "seen_ids": [
-        "210773978",
-        "210775223",
-        "210774074",
-        "210774061",
-        "210773869",
         "210773759",
+        "210773978",
+        "210774061",
+        "210775223",
+        "210774038",
         "210761733",
-        "210774038"
+        "210774074",
+        "210773869"
       ],
       "broken": false
     },
     "PNC": {
       "seen_ids": [
-        "R231526",
-        "R230916",
-        "R230915",
-        "R230922",
         "R230900",
-        "R230898",
+        "R230897",
+        "R231441",
+        "R230913",
+        "R230920",
         "R218205",
+        "R230917",
+        "R231462",
+        "R230912",
         "R231464",
+        "R231530",
         "R231491",
         "R212891",
-        "R230917",
-        "R231489",
         "R230880",
-        "R231462",
-        "R231459",
-        "R230897",
+        "R230915",
         "R230901",
-        "R230920",
-        "R231441",
-        "R230912",
-        "R231530",
-        "R230925",
-        "R230913"
+        "R230916",
+        "R231526",
+        "R230922",
+        "R231489",
+        "R231459",
+        "R230898",
+        "R230925"
       ],
       "broken": false
     },
